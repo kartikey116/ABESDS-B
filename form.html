@@ -1,64 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+    <meta charset="UTF-8">
+    <title>Student Registration Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <form>
-        <label for="stu">student  name</label>
-        <input type="text" id="stu">
-        <label >student password</label>
-        <input type="password" id="stu">
-        <br>
+        <label for="stu_name">Student Name</label>
+        <input type="text" id="stu_name" name="student_name" required>
         
+        <label for="stu_password">Student Password</label>
+        <input type="password" id="stu_password" name="student_password" required>
+        <br>
         
         <!-- radio -->
-
-        <label for="html">Gender</label><br>
-        <input type="radio" id="html" name="adi" value="html1" >
-        <label>Male</label><br>
-        <input type="radio" id="html" name="adi" value="html1">
-        <label>Female</label><br>
-        <input type="radio" id="html" name="adi" value="html1">
-        <label>Other</label><br>
+        <label>Gender</label><br>
+        <input type="radio" id="male" name="gender" value="male" required>
+        <label for="male">Male</label><br>
+        <input type="radio" id="female" name="gender" value="female">
+        <label for="female">Female</label><br>
+        <input type="radio" id="other" name="gender" value="other">
+        <label for="other">Other</label><br>
     
-
         <!-- select -->
-
-        <label>Select your city</label>
-        <select >
-            <option>Meerut</option>
-            <option>Goa</option>
-            <option>Ghaziabad</option>
-            <option>Delhi</option>
+        <label for="city">Select your city</label>
+        <select id="city" name="city" required>
+            <option value="">--Select--</option>
+            <option value="Meerut">Meerut</option>
+            <option value="Goa">Goa</option>
+            <option value="Ghaziabad">Ghaziabad</option>
+            <option value="Delhi">Delhi</option>
         </select>
 
-         <!-- Checkbox -->
-
-        <br>
-        <br>
+        <!-- Checkbox -->
+        <br><br>
         <label>Education</label><br>
-        <label>class 10</label>
-        <input type="checkbox"><br>
-        <label>class 12</label>
-        <input type="checkbox"><br>
-        <label>Btech</label>
-        <input type="checkbox"><br>
-        <label>Mtech</label>
-        <input type="checkbox"><br>
-        <label>Phd</label>
-        <input type="checkbox"><br>
+        <input type="checkbox" id="class10" name="education[]" value="class10">
+        <label for="class10">Class 10</label><br>
+        <input type="checkbox" id="class12" name="education[]" value="class12">
+        <label for="class12">Class 12</label><br>
+        <input type="checkbox" id="btech" name="education[]" value="btech">
+        <label for="btech">BTech</label><br>
+        <input type="checkbox" id="mtech" name="education[]" value="mtech">
+        <label for="mtech">MTech</label><br>
+        <input type="checkbox" id="phd" name="education[]" value="phd">
+        <label for="phd">PhD</label><br>
 
         <!-- button -->
-         <button>click me</button>
-         <input type="submit" value="submit">
+        <button type="button">Click Me</button>
+        <input type="submit" value="Submit">
 
-         <!-- file -->
-          <br><br>
-          
-          <label for="file">Upload your file ::</label>
-          <input type="file" id="file">
-
+        <!-- file -->
+        <br><br>
+        <label for="file">Upload your file:</label>
+        <input type="file" id="file" name="file">
     </form>
 </body>
-</html>
