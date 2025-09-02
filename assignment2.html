@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Form</title>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <table width="100%" bgcolor="#333" style="color: white">
+      <tr>
+        <td width="60">
+          <img
+            src="https://tse4.mm.bing.net/th/id/OIP.47SNPXIuKaqjQZJyWi82qAHaHa?pid=Api&P=0&h=180"
+            alt=""
+            height="40"
+          />
+        </td>
+        <td>
+          <b>Bus book app</b>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Form Card -->
+    <table
+      align="center"
+      border="1"
+      cellpadding="20"
+      cellspacing="0"
+      style="margin-top: 50px"
+    >
+      <tr>
+        <td>
+          <h2 align="center">Welcome to our Bus Booking Service</h2>
+          <form>
+            <table>
+              <tr>
+                <td><label for="username">Username:</label></td>
+                <td>
+                  <input type="text" id="username" name="username" required />
+                </td>
+              </tr>
+              <tr>
+                <td><label for="password">Password:</label></td>
+                <td>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td><label>Gender:</label></td>
+                <td>
+                  <input type="radio" name="gender" value="male" id="male" />
+                  <label for="male">Male</label>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="female"
+                    id="female"
+                  />
+                  <label for="female">Female</label>
+                  <input type="radio" name="gender" value="other" id="other" />
+                  <label for="other">Other</label>
+                </td>
+              </tr>
+              <tr>
+                <td><label for="city">Select Your City:</label></td>
+                <td>
+                  <select id="city" name="city">
+                    <option value="">--Choose--</option>
+                    <option value="delhi">Delhi</option>
+                    <option value="mumbai">Mumbai</option>
+                    <option value="bangalore">Bangalore</option>
+                    <option value="kolkata">Kolkata</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" align="center">
+                  <button
+                    type="button"
+                    onclick="window.location.href='assignment2-1.html'"
+                  >
+                    Book Seat
+                  </button>
+                </td>
+              </tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
