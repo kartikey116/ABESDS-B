@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BlueCarbon MRV Registry</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style id="app-style">
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #334155;
+      }
+
+      .bg-blue-carbon {
+        background-color: #0891b2;
+      }
+
+      .bg-blue-carbon-dark {
+        background-color: #0e7490;
+      }
+
+      .text-blue-carbon {
+        color: #0891b2;
+      }
+
+      .border-blue-carbon {
+        border-color: #0891b2;
+      }
+
+      .btn-primary {
+        @apply bg-blue-carbon hover:bg-blue-carbon-dark text-white font-medium py-2 px-4 rounded-md transition-all duration-200;
+      }
+
+      .btn-secondary {
+        @apply bg-white hover:bg-gray-100 text-gray-700 font-medium py-2 px-4 border border-gray-300 rounded-md transition-all duration-200;
+      }
+
+      .btn-danger {
+        @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition-all duration-200;
+      }
+
+      .form-input {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-carbon focus:border-transparent;
+      }
+
+      .card {
+        @apply bg-white rounded-lg shadow-md overflow-hidden;
+      }
+      
+      #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 0.375rem;
+      }
+
+      .loading-spinner {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #0891b2;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        transform: translateX(150%);
+        transition: transform 0.3s ease;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .slide-enter {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-out;
+      }
+
+      .slide-enter-active {
+        transform: translateX(0);
+      }
+
+      .modal {
+        transition: opacity 0.3s ease;
+      }
+
+      /* For token visualization */
+      .token-card {
+        background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 100%);
+        border-radius: 10px;
+        box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.3);
+      }
+      
+      /* Custom checkbox styling */
+      .custom-checkbox {
+        @apply w-5 h-5 border-2 border-blue-carbon rounded-md bg-white checked:bg-blue-carbon focus:outline-none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="min-h-screen flex flex-col">
+      <!-- Authentication screens -->
+      <div id="auth-container" class="flex min-h-screen">
+        <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-tr from-cyan-800 to-teal-600 justify-center items-center">
+          <div class="max-w-md px-8">
+            <h1 class="text-4xl font-bold text-white mb-4">Blue Carbon Registry & MRV System</h1>
+            <p class="text-cyan-50 text-lg mb-6">A blockchain-powered platform for transparent monitoring, reporting, and verification of blue carbon ecosystems</p>
+            <div class="flex space-x-4">
+              <div class="bg-white/20 backdrop-blur-sm p-4 rounded-lg">
+                <div class="text-3xl text-white font-bold">100+</div>
+                <div class="text-cyan-50">Projects</div>
+              </div>
+              <div class="bg-white/20 backdrop-blur-sm p-4 rounded-lg">
+                <div class="text-3xl text-white font-bold">5K+</div>
+                <div class="text-cyan-50">Carbon Credits</div>
+              </div>
+              <div class="bg-white/20 backdrop-blur-sm p-4 rounded-lg">
+                <div class="text-3xl text-white font-bold">10K+</div>
+                <div class="text-cyan-50">Hectares Protected</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="w-full lg:w-1/2 flex justify-center items-center p-8">
+          <div class="w-full max-w-md">
+            <div class="text-center mb-8 lg:hidden">
+              <h1 class="text-3xl font-bold text-blue-carbon mb-2">Blue Carbon Registry</h1>
+              <p class="text-gray-600">Secure, transparent, verifiable</p>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="card p-8">
+              <h2 class="text-2xl font-semibold mb-6">Sign in to your account</h2>
+              
+              <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="email">
+                  Email Address
+                </label>
+                <input class="form-input" id="email" type="email" placeholder="your.email@example.com">
+              </div>
+              
+              <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-gray-700 text-sm font-medium" for="password">
+                    Password
+                  </label>
+                  <a href="javascript:void(0)" class="text-sm text-blue-carbon hover:text-blue-carbon-dark">
+                    Forgot password?
+                  </a>
+                </div>
+                <input class="form-input" id="password" type="password" placeholder="••••••••">
+              </div>
+              
+              <div class="flex items-center mb-6">
+                <input id="remember-me" type="checkbox" class="custom-checkbox">
+                <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                  Remember me
+                </label>
+              </div>
+              
+              <div class="mb-6">
+                <button id="login-button" class="w-full btn-primary flex justify-center items-center">
+                  <span>Sign in</span>
+                </button>
+              </div>
+              
+              <div class="relative flex py-4 items-center">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-400 text-sm">Or continue with</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-6">
+                <button class="btn-secondary flex justify-center items-center">
+                  <i class="fab fa-google mr-2"></i> Google
+                </button>
+                <button class="btn-secondary flex justify-center items-center">
+                  <i class="fa-solid fa-mobile-screen mr-2"></i> OTP
+                </button>
+              </div>
+              
+              <div class="text-center text-gray-500 text-sm">
+                Don't have an account? 
+                <a href="javascript:void(0)" id="show-register" class="text-blue-carbon hover:text-blue-carbon-dark font-medium">
+                  Register here
+                </a>
+              </div>
+            </div>
+            
+            <!-- Registration Form (hidden by default) -->
+            <div id="register-form" class="card p-8 hidden">
+              <h2 class="text-2xl font-semibold mb-6">Create your account</h2>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-gray-700 text-sm font-medium mb-2" for="first-name">
+                    First Name
+                  </label>
+                  <input class="form-input" id="first-name" type="text" placeholder="First name">
+                </div>
+                <div>
+                  <label class="block text-gray-700 text-sm font-medium mb-2" for="last-name">
+                    Last Name
+                  </label>
+                  <input class="form-input" id="last-name" type="text" placeholder="Last name">
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="reg-email">
+                  Email Address
+                </label>
+                <input class="form-input" id="reg-email" type="email" placeholder="your.email@example.com">
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="organization">
+                  Organization
+                </label>
+                <input class="form-input" id="organization" type="text" placeholder="Your organization name">
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="user-role">
+                  Role
+                </label>
+                <select class="form-input" id="user-role">
+                  <option value="">Select a role</option>
+                  <option value="field_user">Field User</option>
+                  <option value="ngo_staff">NGO Staff</option>
+                  <option value="admin">Admin/Regulator</option>
+                </select>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="reg-password">
+                  Create Password
+                </label>
+                <input class="form-input" id="reg-password" type="password" placeholder="••••••••">
+              </div>
+              
+              <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="confirm-password">
+                  Confirm Password
+                </label>
+                <input class="form-input" id="confirm-password" type="password" placeholder="••••••••">
+              </div>
+              
+              <div class="flex items-center mb-6">
+                <input id="accept-terms" type="checkbox" class="custom-checkbox">
+                <label for="accept-terms" class="ml-2 block text-sm text-gray-700">
+                  I agree to the <a href="javascript:void(0)" class="text-blue-carbon">Terms of Service</a> and <a href="javascript:void(0)" class="text-blue-carbon">Privacy Policy</a>
+                </label>
+              </div>
+              
+              <div class="mb-6">
+                <button id="register-button" class="w-full btn-primary flex justify-center items-center">
+                  <span>Create Account</span>
+                </button>
+              </div>
+              
+              <div class="text-center text-gray-500 text-sm">
+                Already have an account? 
+                <a href="javascript:void(0)" id="show-login" class="text-blue-carbon hover:text-blue-carbon-dark font-medium">
+                  Sign in
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main Application (hidden by default) -->
+      <div id="app-container" class="hidden flex flex-col min-h-screen">
+        <!-- Top Navigation Bar -->
+        <header class="bg-white shadow-sm">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                  <span class="text-blue-carbon text-xl font-bold">BlueCarbon MRV</span>
+                </div>
+                <nav class="hidden sm:ml-6 sm:flex space-x-8">
+                  <a href="javascript:void(0)" class="nav-link" data-page="dashboard">
+                    Dashboard
+                  </a>
+                  <a href="javascript:void(0)" class="nav-link" data-page="projects">
+                    Projects
+                  </a>
+                  <a href="javascript:void(0)" class="nav-link" data-page="tokens">
+                    Carbon Credits
+                  </a>
+                  <a href="javascript:void(0)" class="nav-link" data-page="settings">
+                    Settings
+                  </a>
+                </nav>
+              </div>
+              <div class="flex items-center">
+                <button id="notification-button" class="p-2 rounded-full text-gray-500 hover:text-blue-carbon hover:bg-gray-100 relative">
+                  <i class="fa-regular fa-bell text-xl"></i>
+                  <span class="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500"></span>
+                </button>
+                <div class="ml-3 relative">
+                  <div>
+                    <button id="user-menu-button" class="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-blue-carbon">
+                      <span class="hidden md:block font-medium text-gray-700">John Doe</span>
+                      <div class="h-8 w-8 rounded-full bg-blue-carbon flex items-center justify-center text-white">
+                        JD
+                      </div>
+                    </button>
+                  </div>
+                  <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10">
+                    <a href="javascript:void(0)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                    <a href="javascript:void(0)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Settings</a>
+                    <a href="javascript:void(0)" id="logout-button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center sm:hidden">
+                <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-blue-carbon hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-carbon">
+                  <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mobile menu, show/hide based on menu state -->
+          <div id="mobile-menu" class="sm:hidden hidden">
+            <div class="pt-2 pb-3 space-y-1">
+              <a href="javascript:void(0)" class="mobile-nav-link block pl-3 pr-4 py-2 border-l-4 text-base font-medium" data-page="dashboard">
+                Dashboard
+              </a>
+              <a href="javascript:void(0)" class="mobile-nav-link block pl-3 pr-4 py-2 border-l-4 text-base font-medium" data-page="projects">
+                Projects
+              </a>
+              <a href="javascript:void(0)" class="mobile-nav-link block pl-3 pr-4 py-2 border-l-4 text-base font-medium" data-page="tokens">
+                Carbon Credits
+              </a>
+              <a href="javascript:void(0)" class="mobile-nav-link block pl-3 pr-4 py-2 border-l-4 text-base font-medium" data-page="settings">
+                Settings
+              </a>
+            </div>
+          </div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="flex-1">
+          <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <!-- Dashboard page -->
+            <div id="dashboard-page" class="page-content">
+              <div class="px-4 py-5 sm:px-6">
+                <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+                <p class="mt-1 text-sm text-gray-600">Overview of your blue carbon projects and carbon credits</p>
+              </div>
+              
+              <!-- Role-based content -->
+              <div id="field-user-dashboard" class="role-content hidden">
+                <div class="px-4 sm:px-6">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-blue-100 flex items-center justify-center">
+                          <i class="fa-solid fa-seedling text-blue-carbon text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">My Projects</h3>
+                          <p class="text-3xl font-bold text-gray-700">5</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-green-100 flex items-center justify-center">
+                          <i class="fa-solid fa-leaf text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Total Hectares</h3>
+                          <p class="text-3xl font-bold text-gray-700">12.5</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-cyan-100 flex items-center justify-center">
+                          <i class="fa-solid fa-file-signature text-cyan-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Pending Submissions</h3>
+                          <p class="text-3xl font-bold text-gray-700">2</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="card mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                      <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                      <div class="px-6 py-4">
+                        <div class="flex items-start">
+                          <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                              <i class="fa-solid fa-check text-green-600"></i>
+                            </div>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">Project Submission Approved</p>
+                            <p class="text-sm text-gray-500">Your Pichavaram Mangrove Restoration data was verified and approved.</p>
+                            <p class="mt-1 text-xs text-gray-400">3 days ago</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="px-6 py-4">
+                        <div class="flex items-start">
+                          <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                              <i class="fa-solid fa-upload text-blue-carbon"></i>
+                            </div>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">New Restoration Data Submitted</p>
+                            <p class="text-sm text-gray-500">You submitted new monitoring data for Chilika Lagoon.</p>
+                            <p class="mt-1 text-xs text-gray-400">5 days ago</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="px-6 py-4">
+                        <div class="flex items-start">
+                          <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                              <i class="fa-solid fa-coins text-yellow-600"></i>
+                            </div>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">Carbon Credits Generated</p>
+                            <p class="text-sm text-gray-500">50 carbon credits were issued for your Sundarbans project.</p>
+                            <p class="mt-1 text-xs text-gray-400">1 week ago</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="text-center mb-8">
+                    <button id="new-submission-button" class="btn-primary">
+                      <i class="fa-solid fa-plus mr-2"></i> New Data Submission
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="ngo-staff-dashboard" class="role-content hidden">
+                <div class="px-4 sm:px-6">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-blue-100 flex items-center justify-center">
+                          <i class="fa-solid fa-users text-blue-carbon text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Field Users</h3>
+                          <p class="text-3xl font-bold text-gray-700">12</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-yellow-100 flex items-center justify-center">
+                          <i class="fa-solid fa-clock text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Pending Approvals</h3>
+                          <p class="text-3xl font-bold text-gray-700">7</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-green-100 flex items-center justify-center">
+                          <i class="fa-solid fa-coins text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Total Carbon Credits</h3>
+                          <p class="text-3xl font-bold text-gray-700">2,450</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="lg:col-span-2">
+                      <div class="card h-full">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">Projects Overview</h3>
+                        </div>
+                        <div class="p-6">
+                          <canvas id="projectsChart" height="250"></canvas>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card">
+                      <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Recent Submissions</h3>
+                      </div>
+                      <div class="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+                        <div class="px-6 py-4">
+                          <p class="text-sm font-medium text-gray-900">Sundarbans Mangrove Planting</p>
+                          <p class="text-xs text-gray-500">By: Amit Kumar • 2 hours ago</p>
+                          <div class="mt-2 flex">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Pending
+                            </span>
+                          </div>
+                        </div>
+                        <div class="px-6 py-4">
+                          <p class="text-sm font-medium text-gray-900">Pichavaram Monitoring Data</p>
+                          <p class="text-xs text-gray-500">By: Priya Singh • 5 hours ago</p>
+                          <div class="mt-2 flex">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Pending
+                            </span>
+                          </div>
+                        </div>
+                        <div class="px-6 py-4">
+                          <p class="text-sm font-medium text-gray-900">Chilika Seagrass Assessment</p>
+                          <p class="text-xs text-gray-500">By: Rahul Sharma • 1 day ago</p>
+                          <div class="mt-2 flex">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Approved
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="px-6 py-3 bg-gray-50">
+                        <a href="javascript:void(0)" class="text-sm font-medium text-blue-carbon hover:text-blue-carbon-dark">
+                          View all submissions <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="card mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                      <h3 class="text-lg font-medium text-gray-900">Projects Map</h3>
+                      <div class="flex space-x-2">
+                        <button class="btn-secondary text-sm py-1">
+                          <i class="fa-solid fa-filter mr-1"></i> Filter
+                        </button>
+                        <button class="btn-secondary text-sm py-1">
+                          <i class="fa-solid fa-expand mr-1"></i> Full Screen
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-6">
+                      <div id="ngo-map" class="w-full h-80"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="admin-dashboard" class="role-content hidden">
+                <div class="px-4 sm:px-6">
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-blue-100 flex items-center justify-center">
+                          <i class="fa-solid fa-diagram-project text-blue-carbon text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Total Projects</h3>
+                          <p class="text-3xl font-bold text-gray-700">127</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-green-100 flex items-center justify-center">
+                          <i class="fa-solid fa-tree text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Hectares Protected</h3>
+                          <p class="text-3xl font-bold text-gray-700">12,584</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-yellow-100 flex items-center justify-center">
+                          <i class="fa-solid fa-building text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Organizations</h3>
+                          <p class="text-3xl font-bold text-gray-700">42</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card p-6">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-purple-100 flex items-center justify-center">
+                          <i class="fa-solid fa-coins text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                          <h3 class="text-lg font-medium text-gray-900">Carbon Credits</h3>
+                          <p class="text-3xl font-bold text-gray-700">87,350</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card">
+                      <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Carbon Credits Overview</h3>
+                      </div>
+                      <div class="p-6">
+                        <canvas id="creditsChart" height="250"></canvas>
+                      </div>
+                    </div>
+                    <div class="card">
+                      <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Project Distribution</h3>
+                      </div>
+                      <div class="p-6">
+                        <canvas id="projectDistributionChart" height="250"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="card mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                      <h3 class="text-lg font-medium text-gray-900">Projects Map</h3>
+                      <div class="flex space-x-2">
+                        <button class="btn-secondary text-sm py-1">
+                          <i class="fa-solid fa-download mr-1"></i> Export
+                        </button>
+                        <button class="btn-secondary text-sm py-1">
+                          <i class="fa-solid fa-filter mr-1"></i> Filter
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-6">
+                      <div id="admin-map" class="w-full h-96"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="card">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                      <h3 class="text-lg font-medium text-gray-900">Recent Verification Requests</h3>
+                      <a href="javascript:void(0)" class="text-sm font-medium text-blue-carbon hover:text-blue-carbon-dark">
+                        View all
+                      </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                          <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Project
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Organization
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Location
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Submission Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                          <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm font-medium text-gray-900">Sundarbans Mangrove Restoration</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">Coastal Guardian NGO</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">West Bengal</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">June 12, 2025</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Pending
+                              </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">Review</a>
+                              <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Details</a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm font-medium text-gray-900">Chilika Lake Seagrass</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">Marine Life Trust</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">Odisha</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">June 10, 2025</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Pending
+                              </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">Review</a>
+                              <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Details</a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm font-medium text-gray-900">Pichavaram Mangrove Assessment</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">South Indian Conservation</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">Tamil Nadu</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-500">June 8, 2025</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Approved
+                              </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Details</a>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Projects page -->
+            <div id="projects-page" class="page-content hidden">
+              <div class="px-4 py-5 sm:px-6">
+                <div class="md:flex md:items-center md:justify-between">
+                  <div>
+                    <h1 class="text-2xl font-semibold text-gray-900">Projects</h1>
+                    <p class="mt-1 text-sm text-gray-600">Manage all blue carbon ecosystem restoration projects</p>
+                  </div>
+                  <div class="mt-4 md:mt-0">
+                    <button id="add-project-button" class="btn-primary">
+                      <i class="fa-solid fa-plus mr-2"></i> Add Project
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="px-4 sm:px-6">
+                <div class="card mb-6">
+                  <div class="p-4 border-b border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <i class="fa-solid fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" class="form-input pl-10" placeholder="Search projects...">
+                      </div>
+                      <div>
+                        <select class="form-input">
+                          <option value="">Filter by Type</option>
+                          <option value="mangrove">Mangrove</option>
+                          <option value="seagrass">Seagrass</option>
+                          <option value="saltmarsh">Salt Marsh</option>
+                        </select>
+                      </div>
+                      <div>
+                        <select class="form-input">
+                          <option value="">Filter by Status</option>
+                          <option value="active">Active</option>
+                          <option value="pending">Pending</option>
+                          <option value="completed">Completed</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Project Name
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Type
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Location
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Area (ha)
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Start Date
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">Sundarbans Mangrove Restoration</div>
+                            <div class="text-xs text-gray-500">ID: BC-2025-001</div>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Mangrove
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            West Bengal, India
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            128.5
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Jan 15, 2025
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Active
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                            <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Edit</a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">Pichavaram Mangrove Conservation</div>
+                            <div class="text-xs text-gray-500">ID: BC-2025-002</div>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Mangrove
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Tamil Nadu, India
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            85.2
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Feb 3, 2025
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Active
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                            <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Edit</a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">Chilika Lake Seagrass Restoration</div>
+                            <div class="text-xs text-gray-500">ID: BC-2025-003</div>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Seagrass
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Odisha, India
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            42.7
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Mar 11, 2025
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Pending
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                            <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Edit</a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">Gulf of Mannar Seagrass Project</div>
+                            <div class="text-xs text-gray-500">ID: BC-2025-004</div>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Seagrass
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Tamil Nadu, India
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            56.4
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Apr 5, 2025
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Active
+                            </span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                            <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Edit</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                    <nav class="flex items-center justify-between">
+                      <div class="hidden sm:block">
+                        <p class="text-sm text-gray-700">
+                          Showing <span class="font-medium">1</span> to <span class="font-medium">4</span> of <span class="font-medium">12</span> projects
+                        </p>
+                      </div>
+                      <div class="flex-1 flex justify-between sm:justify-end">
+                        <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50" disabled>
+                          Previous
+                        </button>
+                        <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                          Next
+                        </button>
+                      </div>
+                    </nav>
+                  </div>
+                </div>
+                
+                <div class="card mb-6">
+                  <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Projects Map</h3>
+                  </div>
+                  <div class="p-6">
+                    <div id="projects-map" class="w-full h-96"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tokens page -->
+            <div id="tokens-page" class="page-content hidden">
+              <div class="px-4 py-5 sm:px-6">
+                <div class="md:flex md:items-center md:justify-between">
+                  <div>
+                    <h1 class="text-2xl font-semibold text-gray-900">Carbon Credits</h1>
+                    <p class="mt-1 text-sm text-gray-600">Manage tokenized carbon credits on the blockchain</p>
+                  </div>
+                  <div class="mt-4 md:mt-0">
+                    <button id="create-token-button" class="btn-primary">
+                      <i class="fa-solid fa-plus mr-2"></i> Create Token
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="px-4 sm:px-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div class="card p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-12 w-12 rounded-md bg-green-100 flex items-center justify-center">
+                        <i class="fa-solid fa-leaf text-green-600 text-xl"></i>
+                      </div>
+                      <div class="ml-4">
+                        <h3 class="text-lg font-medium text-gray-900">Total Credits</h3>
+                        <p class="text-3xl font-bold text-gray-700">87,350</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-12 w-12 rounded-md bg-blue-100 flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-blue-carbon text-xl"></i>
+                      </div>
+                      <div class="ml-4">
+                        <h3 class="text-lg font-medium text-gray-900">Active Projects</h3>
+                        <p class="text-3xl font-bold text-gray-700">42</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-12 w-12 rounded-md bg-purple-100 flex items-center justify-center">
+                        <i class="fa-solid fa-cubes text-purple-600 text-xl"></i>
+                      </div>
+                      <div class="ml-4">
+                        <h3 class="text-lg font-medium text-gray-900">Blockchain Tx</h3>
+                        <p class="text-3xl font-bold text-gray-700">1,245</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+                  <div class="xl:col-span-2">
+                    <div class="card mb-6">
+                      <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                          <h3 class="text-lg font-medium text-gray-900">Carbon Credit Tokens</h3>
+                          <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <i class="fa-solid fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" class="form-input pl-10 text-sm py-1" placeholder="Search tokens...">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                          <thead class="bg-gray-50">
+                            <tr>
+                              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Token ID
+                              </th>
+                              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Project
+                              </th>
+                              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Credits
+                              </th>
+                              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Issue Date
+                              </th>
+                              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
+                                0xbc42...e9f1
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                Sundarbans Mangrove
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2,500
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Jun 12, 2025
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Active
+                                </span>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                                <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Transfer</a>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
+                                0xde78...12a3
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                Pichavaram Mangrove
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                1,800
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                May 28, 2025
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Active
+                                </span>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                                <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Transfer</a>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
+                                0xf120...87b4
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                Chilika Lake Seagrass
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                1,200
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                May 15, 2025
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  Pending
+                                </span>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark mr-3">View</a>
+                                <a href="javascript:void(0)" class="text-gray-500 hover:text-gray-700">Transfer</a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                        <nav class="flex items-center justify-between">
+                          <div class="hidden sm:block">
+                            <p class="text-sm text-gray-700">
+                              Showing <span class="font-medium">1</span> to <span class="font-medium">3</span> of <span class="font-medium">24</span> tokens
+                            </p>
+                          </div>
+                          <div class="flex-1 flex justify-between sm:justify-end">
+                            <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50" disabled>
+                              Previous
+                            </button>
+                            <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                              Next
+                            </button>
+                          </div>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div class="card mb-6">
+                      <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Token Distribution</h3>
+                      </div>
+                      <div class="p-6">
+                        <canvas id="tokenDistributionChart" height="200"></canvas>
+                      </div>
+                    </div>
+                    
+                    <div class="card">
+                      <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Featured Token</h3>
+                        <div class="token-card p-4 text-white">
+                          <div class="flex justify-between items-start mb-4">
+                            <div>
+                              <div class="text-xs opacity-80">Token ID</div>
+                              <div class="font-mono text-sm">0xbc42...e9f1</div>
+                            </div>
+                            <div class="bg-white/20 rounded-full p-2">
+                              <i class="fa-solid fa-leaf"></i>
+                            </div>
+                          </div>
+                          <div class="mb-4">
+                            <div class="text-xs opacity-80">Project</div>
+                            <div class="text-lg font-semibold">Sundarbans Mangrove</div>
+                          </div>
+                          <div class="flex justify-between items-end">
+                            <div>
+                              <div class="text-xs opacity-80">Credits</div>
+                              <div class="text-xl font-bold">2,500</div>
+                            </div>
+                            <div>
+                              <div class="text-xs opacity-80">Issued</div>
+                              <div class="font-medium">Jun 12, 2025</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="mt-4">
+                          <h4 class="text-sm font-medium text-gray-900 mb-2">Transaction History</h4>
+                          <div class="space-y-3">
+                            <div class="flex items-center text-xs">
+                              <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                                <i class="fa-solid fa-plus text-green-600"></i>
+                              </div>
+                              <div class="flex-1">
+                                <div class="font-medium">Token Created</div>
+                                <div class="text-gray-500">Jun 12, 2025 • TX: 0x78a3...b4e2</div>
+                              </div>
+                            </div>
+                            <div class="flex items-center text-xs">
+                              <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                                <i class="fa-solid fa-check text-blue-600"></i>
+                              </div>
+                              <div class="flex-1">
+                                <div class="font-medium">Verification Completed</div>
+                                <div class="text-gray-500">Jun 10, 2025 • TX: 0xf44b...9c1a</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Settings page -->
+            <div id="settings-page" class="page-content hidden">
+              <div class="px-4 py-5 sm:px-6">
+                <h1 class="text-2xl font-semibold text-gray-900">Settings</h1>
+                <p class="mt-1 text-sm text-gray-600">Manage your account and application preferences</p>
+              </div>
+              
+              <div class="px-4 sm:px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <div class="lg:col-span-1">
+                    <nav class="space-y-1">
+                      <a href="javascript:void(0)" class="settings-nav-link bg-blue-50 border-blue-carbon text-blue-carbon group rounded-md px-3 py-2 flex items-center text-sm font-medium" data-tab="profile">
+                        <i class="fa-regular fa-user text-blue-carbon group-hover:text-blue-carbon-dark mr-3"></i>
+                        <span>Profile</span>
+                      </a>
+                      <a href="javascript:void(0)" class="settings-nav-link border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group rounded-md px-3 py-2 flex items-center text-sm font-medium" data-tab="notifications">
+                        <i class="fa-regular fa-bell text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                        <span>Notifications</span>
+                      </a>
+                      <a href="javascript:void(0)" class="settings-nav-link border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group rounded-md px-3 py-2 flex items-center text-sm font-medium" data-tab="security">
+                        <i class="fa-solid fa-shield-halved text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                        <span>Security</span>
+                      </a>
+                      <a href="javascript:void(0)" class="settings-nav-link border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group rounded-md px-3 py-2 flex items-center text-sm font-medium" data-tab="blockchain">
+                        <i class="fa-solid fa-cubes text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                        <span>Blockchain</span>
+                      </a>
+                      <a href="javascript:void(0)" class="settings-nav-link border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group rounded-md px-3 py-2 flex items-center text-sm font-medium" data-tab="api">
+                        <i class="fa-solid fa-code text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                        <span>API Access</span>
+                      </a>
+                    </nav>
+                  </div>
+                  
+                  <div class="lg:col-span-3">
+                    <div id="profile-tab" class="settings-tab">
+                      <div class="card">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">Profile Information</h3>
+                        </div>
+                        <div class="p-6">
+                          <div class="flex items-center mb-6">
+                            <div class="h-20 w-20 rounded-full bg-blue-carbon flex items-center justify-center text-white text-xl font-bold">
+                              JD
+                            </div>
+                            <div class="ml-4">
+                              <button class="btn-secondary text-sm">
+                                <i class="fa-solid fa-camera mr-2"></i> Change Photo
+                              </button>
+                              <p class="text-xs text-gray-500 mt-1">JPG, PNG or GIF. 1MB max.</p>
+                            </div>
+                          </div>
+                          
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                              <input type="text" class="form-input" value="John">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                              <input type="text" class="form-input" value="Doe">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                              <input type="email" class="form-input" value="john.doe@example.com">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                              <input type="tel" class="form-input" value="+91 98765 43210">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                              <input type="text" class="form-input" value="Coastal Guardian NGO">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                              <select class="form-input">
+                                <option value="field_user">Field User</option>
+                                <option value="ngo_staff" selected>NGO Staff</option>
+                                <option value="admin">Admin/Regulator</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div class="mt-6 border-t border-gray-200 pt-6">
+                            <button class="btn-primary">Save Changes</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="notifications-tab" class="settings-tab hidden">
+                      <div class="card">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">Notification Settings</h3>
+                        </div>
+                        <div class="p-6">
+                          <div class="space-y-6">
+                            <div>
+                              <h4 class="text-sm font-medium text-gray-900 mb-3">Email Notifications</h4>
+                              <div class="space-y-3">
+                                <div class="flex items-center">
+                                  <input id="notify-approvals" type="checkbox" class="custom-checkbox" checked>
+                                  <label for="notify-approvals" class="ml-2 text-sm text-gray-700">
+                                    Project approval updates
+                                  </label>
+                                </div>
+                                <div class="flex items-center">
+                                  <input id="notify-tokens" type="checkbox" class="custom-checkbox" checked>
+                                  <label for="notify-tokens" class="ml-2 text-sm text-gray-700">
+                                    New token generation
+                                  </label>
+                                </div>
+                                <div class="flex items-center">
+                                  <input id="notify-submissions" type="checkbox" class="custom-checkbox" checked>
+                                  <label for="notify-submissions" class="ml-2 text-sm text-gray-700">
+                                    New data submissions
+                                  </label>
+                                </div>
+                                <div class="flex items-center">
+                                  <input id="notify-system" type="checkbox" class="custom-checkbox">
+                                  <label for="notify-system" class="ml-2 text-sm text-gray-700">
+                                    System updates and announcements
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-6">
+                              <h4 class="text-sm font-medium text-gray-900 mb-3">Push Notifications</h4>
+                              <div class="space-y-3">
+                                <div class="flex items-center">
+                                  <input id="push-approvals" type="checkbox" class="custom-checkbox" checked>
+                                  <label for="push-approvals" class="ml-2 text-sm text-gray-700">
+                                    Project approval updates
+                                  </label>
+                                </div>
+                                <div class="flex items-center">
+                                  <input id="push-tokens" type="checkbox" class="custom-checkbox" checked>
+                                  <label for="push-tokens" class="ml-2 text-sm text-gray-700">
+                                    New token generation
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-6">
+                              <h4 class="text-sm font-medium text-gray-900 mb-3">Notification Frequency</h4>
+                              <div class="space-y-3">
+                                <div class="flex items-center">
+                                  <input id="freq-immediate" type="radio" name="notification-frequency" class="custom-checkbox" checked>
+                                  <label for="freq-immediate" class="ml-2 text-sm text-gray-700">
+                                    Immediately
+                                  </label>
+                                </div>
+                                <div class="flex items-center">
+                                  <input id="freq-daily" type="radio" name="notification-frequency" class="custom-checkbox">
+                                  <label for="freq-daily" class="ml-2 text-sm text-gray-700">
+                                    Daily digest
+                                  </label>
+                                </div>
+                                <div class="flex items-center">
+                                  <input id="freq-weekly" type="radio" name="notification-frequency" class="custom-checkbox">
+                                  <label for="freq-weekly" class="ml-2 text-sm text-gray-700">
+                                    Weekly digest
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="mt-6 border-t border-gray-200 pt-6">
+                            <button class="btn-primary">Save Preferences</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="security-tab" class="settings-tab hidden">
+                      <div class="card mb-6">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">Change Password</h3>
+                        </div>
+                        <div class="p-6">
+                          <div class="space-y-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                              <input type="password" class="form-input" placeholder="••••••••">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                              <input type="password" class="form-input" placeholder="••••••••">
+                              <p class="text-xs text-gray-500 mt-1">Password must be at least 8 characters and contain a number and special character.</p>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                              <input type="password" class="form-input" placeholder="••••••••">
+                            </div>
+                          </div>
+                          
+                          <div class="mt-6">
+                            <button class="btn-primary">Update Password</button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="card">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">Two-Factor Authentication</h3>
+                        </div>
+                        <div class="p-6">
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <h4 class="text-sm font-medium text-gray-900">Status: <span class="text-green-600">Enabled</span></h4>
+                              <p class="text-sm text-gray-600 mt-1">Two-factor authentication adds an extra layer of security to your account.</p>
+                            </div>
+                            <div>
+                              <button class="btn-secondary">
+                                <i class="fa-solid fa-gear mr-2"></i> Configure
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div class="mt-6 border-t border-gray-200 pt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Authentication Methods</h4>
+                            
+                            <div class="space-y-4">
+                              <div class="flex items-center">
+                                <input id="auth-app" type="radio" name="auth-method" class="custom-checkbox" checked>
+                                <div class="ml-3">
+                                  <label for="auth-app" class="text-sm font-medium text-gray-700">
+                                    Authenticator App
+                                  </label>
+                                  <p class="text-xs text-gray-500">Use Google Authenticator or similar app</p>
+                                </div>
+                              </div>
+                              <div class="flex items-center">
+                                <input id="auth-sms" type="radio" name="auth-method" class="custom-checkbox">
+                                <div class="ml-3">
+                                  <label for="auth-sms" class="text-sm font-medium text-gray-700">
+                                    SMS Authentication
+                                  </label>
+                                  <p class="text-xs text-gray-500">Receive codes via text message</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="mt-6 border-t border-gray-200 pt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Recovery Codes</h4>
+                            <p class="text-sm text-gray-600 mb-3">Recovery codes can be used to access your account if you lose your phone or cannot receive two-factor authentication codes.</p>
+                            <button class="btn-secondary text-sm">
+                              <i class="fa-solid fa-download mr-2"></i> Download Recovery Codes
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="blockchain-tab" class="settings-tab hidden">
+                      <div class="card mb-6">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">Blockchain Settings</h3>
+                        </div>
+                        <div class="p-6">
+                          <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Blockchain Network</h4>
+                            <select class="form-input">
+                              <option value="polygon">Polygon (Production)</option>
+                              <option value="polygon_testnet">Polygon Mumbai (Testnet)</option>
+                              <option value="ethereum">Ethereum</option>
+                            </select>
+                          </div>
+                          
+                          <div class="mb-6 border-t border-gray-200 pt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Wallet Configuration</h4>
+                            <div class="space-y-4">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Wallet Address</label>
+                                <div class="flex">
+                                  <input type="text" class="form-input rounded-r-none" value="0x742EF7F5B152eE0c5D1Db95a4c6f489C25cfEF88" readonly>
+                                  <button class="bg-gray-100 px-3 border border-l-0 border-gray-300 rounded-r-md text-gray-500">
+                                    <i class="fa-regular fa-copy"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div>
+                                <button class="btn-secondary">
+                                  <i class="fa-solid fa-wallet mr-2"></i> Connect Different Wallet
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="mb-6 border-t border-gray-200 pt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Smart Contract Settings</h4>
+                            <div class="space-y-4">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Carbon Credit Token Contract</label>
+                                <div class="flex">
+                                  <input type="text" class="form-input rounded-r-none" value="0x1Ea5F0bC9A9f3Ee6bb1C98bcF0509Ccabe1b13F2" readonly>
+                                  <button class="bg-gray-100 px-3 border border-l-0 border-gray-300 rounded-r-md text-gray-500">
+                                    <i class="fa-regular fa-copy"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Registry Contract</label>
+                                <div class="flex">
+                                  <input type="text" class="form-input rounded-r-none" value="0x8A753747A1Fa494EC906cE90E9f37563A8AF630e" readonly>
+                                  <button class="bg-gray-100 px-3 border border-l-0 border-gray-300 rounded-r-md text-gray-500">
+                                    <i class="fa-regular fa-copy"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="mb-6 border-t border-gray-200 pt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Transaction Gas Settings</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Gas Price Strategy</label>
+                                <select class="form-input">
+                                  <option value="fast">Fast</option>
+                                  <option value="medium" selected>Medium</option>
+                                  <option value="slow">Slow</option>
+                                  <option value="custom">Custom</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Max Gas Price (Gwei)</label>
+                                <input type="number" class="form-input" value="100">
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="border-t border-gray-200 pt-6">
+                            <button class="btn-primary">Save Blockchain Settings</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="api-tab" class="settings-tab hidden">
+                      <div class="card">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                          <h3 class="text-lg font-medium text-gray-900">API Access</h3>
+                        </div>
+                        <div class="p-6">
+                          <p class="text-sm text-gray-600 mb-6">Generate API keys to integrate with the Blue Carbon Registry and MRV system.</p>
+                          
+                          <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">API Keys</h4>
+                            <div class="bg-gray-50 border border-gray-200 rounded-md overflow-hidden">
+                              <div class="p-4 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                  <div>
+                                    <h5 class="text-sm font-medium text-gray-900">Production Key</h5>
+                                    <p class="text-xs text-gray-500">Created on May 10, 2025</p>
+                                  </div>
+                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Active
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="px-4 py-3">
+                                <div class="flex">
+                                  <input type="text" class="form-input rounded-r-none bg-gray-50 border-gray-300" value="••••••••••••••••••••••••••••••" readonly>
+                                  <button class="bg-gray-100 px-3 border border-l-0 border-gray-300 rounded-r-md text-gray-500">
+                                    <i class="fa-regular fa-eye"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="bg-gray-50 px-4 py-3 text-right border-t border-gray-200">
+                                <button class="btn-secondary text-sm mr-2">
+                                  <i class="fa-solid fa-arrow-rotate-right mr-1"></i> Regenerate
+                                </button>
+                                <button class="btn-danger text-sm">
+                                  <i class="fa-solid fa-trash mr-1"></i> Revoke
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Create New API Key</h4>
+                            <div class="space-y-4">
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Key Name</label>
+                                <input type="text" class="form-input" placeholder="e.g., Development Key">
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Permissions</label>
+                                <div class="space-y-2 mt-2">
+                                  <div class="flex items-center">
+                                    <input id="perm-read" type="checkbox" class="custom-checkbox" checked>
+                                    <label for="perm-read" class="ml-2 text-sm text-gray-700">
+                                      Read (GET)
+                                    </label>
+                                  </div>
+                                  <div class="flex items-center">
+                                    <input id="perm-write" type="checkbox" class="custom-checkbox">
+                                    <label for="perm-write" class="ml-2 text-sm text-gray-700">
+                                      Write (POST, PUT)
+                                    </label>
+                                  </div>
+                                  <div class="flex items-center">
+                                    <input id="perm-delete" type="checkbox" class="custom-checkbox">
+                                    <label for="perm-delete" class="ml-2 text-sm text-gray-700">
+                                      Delete (DELETE)
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">IP Restrictions (Optional)</label>
+                                <input type="text" class="form-input" placeholder="e.g., 192.168.1.1, 10.0.0.1">
+                                <p class="text-xs text-gray-500 mt-1">Comma separated IP addresses</p>
+                              </div>
+                              <div>
+                                <button class="btn-primary">
+                                  <i class="fa-solid fa-plus mr-2"></i> Generate API Key
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="border-t border-gray-200 pt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">API Documentation</h4>
+                            <p class="text-sm text-gray-600 mb-3">Access comprehensive documentation on how to integrate with our API endpoints.</p>
+                            <a href="javascript:void(0)" class="text-blue-carbon hover:text-blue-carbon-dark font-medium text-sm">
+                              <i class="fa-solid fa-book mr-2"></i> View API Documentation
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        
+        <footer class="bg-white border-t border-gray-200">
+          <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:justify-between">
+              <div class="flex justify-center md:order-2 space-x-6">
+                <a href="javascript:void(0)" class="text-gray-400 hover:text-gray-500">
+                  <i class="fab fa-twitter"></i>
+                </a>
+                <a href="javascript:void(0)" class="text-gray-400 hover:text-gray-500">
+                  <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="javascript:void(0)" class="text-gray-400 hover:text-gray-500">
+                  <i class="fab fa-github"></i>
+                </a>
+              </div>
+              <div class="mt-8 md:mt-0 md:order-1">
+                <p class="text-center text-sm text-gray-500">
+                  &copy; 2025 Blue Carbon Registry and MRV System. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+      
+      <!-- Data Collection Modal -->
+      <div id="data-collection-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="bg-blue-carbon px-6 py-4 rounded-t-lg">
+              <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-white">Submit Restoration Data</h3>
+                <button id="close-modal" class="text-white hover:text-gray-200">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+                  <select class="form-input">
+                    <option value="">Select a project</option>
+                    <option value="1">Sundarbans Mangrove Restoration</option>
+                    <option value="2">Pichavaram Mangrove Conservation</option>
+                    <option value="3">Chilika Lake Seagrass Restoration</option>
+                  </select>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
+                    <input type="text" class="form-input" placeholder="Site name">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                    <input type="text" class="form-input" placeholder="E.g., Avicennia marina">
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date of Planting/Monitoring</label>
+                    <input type="date" class="form-input">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Area in Hectares</label>
+                    <input type="number" step="0.01" class="form-input" placeholder="0.00">
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">GPS Location</label>
+                  <div class="flex space-x-2">
+                    <input type="text" class="form-input flex-1" placeholder="Latitude" id="latitude">
+                    <input type="text" class="form-input flex-1" placeholder="Longitude" id="longitude">
+                    <button id="get-location" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md">
+                      <i class="fa-solid fa-location-crosshairs"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea class="form-input" rows="3" placeholder="Enter details about the restoration activity"></textarea>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-3">Upload Photos/Videos</label>
+                  <div class="flex items-center justify-center px-6 py-4 border-2 border-dashed border-gray-300 rounded-md">
+                    <div class="space-y-1 text-center">
+                      <i class="fa-solid fa-cloud-arrow-up text-gray-400 text-2xl"></i>
+                      <div class="flex text-sm text-gray-600">
+                        <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-carbon hover:text-blue-carbon-dark focus-within:outline-none">
+                          <span>Upload a file</span>
+                          <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple>
+                        </label>
+                        <p class="pl-1">or drag and drop</p>
+                      </div>
+                      <p class="text-xs text-gray-500">
+                        PNG, JPG, MP4 up to 10MB
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div class="flex items-center">
+                    <input id="offline-storage" type="checkbox" class="custom-checkbox">
+                    <label for="offline-storage" class="ml-2 block text-sm text-gray-700">
+                      Save form data for offline use
+                    </label>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">Data will be stored locally and synchronized when connectivity is available.</p>
+                </div>
+              </div>
+              
+              <div class="mt-6 border-t border-gray-200 pt-6 flex justify-end space-x-3">
+                <button id="cancel-data-submit" class="btn-secondary">Cancel</button>
+                <button id="save-data-submit" class="btn-secondary">Save as Draft</button>
+                <button id="submit-data-submit" class="btn-primary">Submit Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Token Creation Modal -->
+      <div id="token-creation-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="bg-blue-carbon px-6 py-4 rounded-t-lg">
+              <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-white">Create Carbon Credit Token</h3>
+                <button class="close-modal text-white hover:text-gray-200">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+                  <select class="form-input">
+                    <option value="">Select a verified project</option>
+                    <option value="1">Sundarbans Mangrove Restoration</option>
+                    <option value="2">Pichavaram Mangrove Conservation</option>
+                  </select>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Credit Amount</label>
+                    <input type="number" class="form-input" placeholder="Amount of carbon credits">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vintage Year</label>
+                    <select class="form-input">
+                      <option value="2025">2025</option>
+                      <option value="2024">2024</option>
+                      <option value="2023">2023</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Serial Number Format</label>
+                  <select class="form-input">
+                    <option value="standard">Standard (Project-Year-Sequence)</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Credit Type</label>
+                  <div class="space-y-2 mt-2">
+                    <div class="flex items-center">
+                      <input id="type-removal" type="radio" name="credit-type" class="custom-checkbox" checked>
+                      <label for="type-removal" class="ml-2 text-sm text-gray-700">
+                        Carbon Removal
+                      </label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="type-reduction" type="radio" name="credit-type" class="custom-checkbox">
+                      <label for="type-reduction" class="ml-2 text-sm text-gray-700">
+                        Emissions Reduction
+                      </label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="type-avoidance" type="radio" name="credit-type" class="custom-checkbox">
+                      <label for="type-avoidance" class="ml-2 text-sm text-gray-700">
+                        Emissions Avoidance
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Beneficiary Address</label>
+                  <input type="text" class="form-input" placeholder="0x...">
+                  <p class="text-xs text-gray-500 mt-1">Blockchain address that will receive the carbon credits</p>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Additional Metadata</label>
+                  <textarea class="form-input" rows="3" placeholder="Additional information to store with the token"></textarea>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-md">
+                  <h4 class="text-sm font-medium text-gray-900 mb-2">Gas Fee Estimation</h4>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Estimated Gas:</span>
+                    <span class="text-gray-900">0.002 MATIC</span>
+                  </div>
+                  <div class="flex justify-between text-sm mt-1">
+                    <span class="text-gray-500">Estimated Transaction Time:</span>
+                    <span class="text-gray-900">~30 seconds</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-6 border-t border-gray-200 pt-6 flex justify-end space-x-3">
+                <button class="cancel-token-creation btn-secondary">Cancel</button>
+                <button id="create-token-submit" class="btn-primary">Create Token</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Project Creation Modal -->
+      <div id="project-creation-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="bg-blue-carbon px-6 py-4 rounded-t-lg">
+              <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-white">Create New Project</h3>
+                <button class="close-modal text-white hover:text-gray-200">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+                  <input type="text" class="form-input" placeholder="Enter project name">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Project Type</label>
+                    <select class="form-input">
+                      <option value="">Select project type</option>
+                      <option value="mangrove">Mangrove</option>
+                      <option value="seagrass">Seagrass</option>
+                      <option value="saltmarsh">Salt Marsh</option>
+                      <option value="mixed">Mixed Blue Carbon</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" class="form-input">
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Location</label>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" class="form-input" placeholder="City/District">
+                    <input type="text" class="form-input" placeholder="State">
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Area (Hectares)</label>
+                  <input type="number" step="0.01" class="form-input" placeholder="Total area in hectares">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Boundary Coordinates</label>
+                  <textarea class="form-input" rows="3" placeholder="Enter GeoJSON or coordinate pairs"></textarea>
+                  <p class="text-xs text-gray-500 mt-1">Format: [longitude,latitude], [longitude,latitude], ...</p>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Description</label>
+                  <textarea class="form-input" rows="4" placeholder="Describe the project objectives, activities, and expected outcomes"></textarea>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                  <select class="form-input">
+                    <option value="">Select organization</option>
+                    <option value="1">Coastal Guardian NGO</option>
+                    <option value="2">Marine Life Trust</option>
+                    <option value="3">South Indian Conservation</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Project Manager</label>
+                  <select class="form-input">
+                    <option value="">Select project manager</option>
+                    <option value="1">John Doe</option>
+                    <option value="2">Priya Singh</option>
+                    <option value="3">Rahul Sharma</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Methodology</label>
+                  <select class="form-input">
+                    <option value="">Select carbon calculation methodology</option>
+                    <option value="vm0033">VM0033 - Tidal Wetland and Seagrass Restoration</option>
+                    <option value="ar-acm0003">AR-ACM0003 - Mangrove Restoration</option>
+                    <option value="ar-acm0014">AR-ACM0014 - Wetlands Restoration and Conservation</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="mt-6 border-t border-gray-200 pt-6 flex justify-end space-x-3">
+                <button class="cancel-project-creation btn-secondary">Cancel</button>
+                <button id="save-project-draft" class="btn-secondary">Save as Draft</button>
+                <button id="create-project-submit" class="btn-primary">Create Project</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Toast Notification -->
+      <div id="toast-notification" class="toast bg-white rounded-lg shadow-lg border-l-4 p-4 w-80">
+        <div class="flex items-center">
+          <div id="toast-icon" class="flex-shrink-0 w-6 h-6 text-green-500 mr-3">
+            <i id="toast-icon-i" class="fa-solid fa-check-circle text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <p id="toast-title" class="text-sm font-medium text-gray-900">Success!</p>
+            <p id="toast-message" class="text-sm text-gray-500">Operation completed successfully.</p>
+          </div>
+          <button id="close-toast" class="text-gray-400 hover:text-gray-500">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script id="app-script">
+      document.addEventListener('DOMContentLoaded', function() {
+        // Authentication handling
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        if (showRegisterLink) {
+          showRegisterLink.addEventListener('click', function() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+          });
+        }
+        
+        if (showLoginLink) {
+          showLoginLink.addEventListener('click', function() {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+          });
+        }
+        
+        // Login functionality
+        const loginButton = document.getElementById('login-button');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        
+        if (loginButton) {
+          loginButton.addEventListener('click', function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+              showToast('Error', 'Please fill in all required fields', 'error');
+              return;
+            }
+            
+            // Check if there's a user role saved in localStorage for demo purposes
+            let userRole = localStorage.getItem('userRole');
+            
+            // If no role is set, determine based on the email for demo purposes
+            if (!userRole) {
+              if (email.includes('field')) {
+                userRole = 'field_user';
+              } else if (email.includes('ngo')) {
+                userRole = 'ngo_staff';
+              } else {
+                userRole = 'admin';
+              }
+              localStorage.setItem('userRole', userRole);
+            }
+            
+            // Login successful, show app container and hide auth container
+            authContainer.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            
+            // Set active nav link
+            document.querySelectorAll('.nav-link').forEach(el => {
+              el.classList.remove('border-blue-carbon', 'text-blue-carbon', 'border-b-2', 'font-medium');
+              el.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent', 'border-b-2');
+            });
+            
+            // Show dashboard as default and set proper role content
+            showPage('dashboard');
+            setRoleSpecificContent(userRole);
+            
+            showToast('Success', 'Login successful!', 'success');
+          });
+        }
+        
+        // Registration functionality
+        const registerButton = document.getElementById('register-button');
+        
+        if (registerButton) {
+          registerButton.addEventListener('click', function() {
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const acceptTerms = document.getElementById('accept-terms').checked;
+            const userRole = document.getElementById('user-role').value;
+            
+            if (!firstName || !lastName || !email || !password || !confirmPassword || !userRole) {
+              showToast('Error', 'Please fill in all required fields', 'error');
+              return;
+            }
+            
+            if (password !== confirmPassword) {
+              showToast('Error', 'Passwords do not match', 'error');
+              return;
+            }
+            
+            if (!acceptTerms) {
+              showToast('Error', 'You must accept the Terms of Service', 'error');
+              return;
+            }
+            
+            // Store user role in localStorage for demo purposes
+            localStorage.setItem('userRole', userRole);
+            
+            // Registration successful, show login form
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            
+            showToast('Success', 'Registration successful! Please log in.', 'success');
+          });
+        }
+        
+        // Logout functionality
+        const logoutButton = document.getElementById('logout-button');
+        
+        if (logoutButton) {
+          logoutButton.addEventListener('click', function() {
+            // Logout successful, show auth container and hide app container
+            authContainer.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+            
+            showToast('Success', 'Logged out successfully', 'success');
+          });
+        }
+        
+        // Navigation functionality
+        const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+        
+        navLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            const page = this.getAttribute('data-page');
+            showPage(page);
+          });
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+          mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+          });
+        }
+        
+        // User menu dropdown
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        if (userMenuButton && userDropdown) {
+          userMenuButton.addEventListener('click', function() {
+            userDropdown.classList.toggle('hidden');
+          });
+          
+          // Close dropdown when clicking outside
+          document.addEventListener('click', function(event) {
+            if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+              userDropdown.classList.add('hidden');
+            }
+          });
+        }
+        
+        // Settings page tabs
+        const settingsNavLinks = document.querySelectorAll('.settings-nav-link');
+        const settingsTabs = document.querySelectorAll('.settings-tab');
+        
+        settingsNavLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            const tab = this.getAttribute('data-tab');
+            
+            // Remove active class from all nav links
+            settingsNavLinks.forEach(el => {
+              el.classList.remove('bg-blue-50', 'border-blue-carbon', 'text-blue-carbon');
+              el.classList.add('border-transparent', 'text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+            });
+            
+            // Add active class to clicked link
+            this.classList.add('bg-blue-50', 'border-blue-carbon', 'text-blue-carbon');
+            this.classList.remove('border-transparent', 'text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+            
+            // Hide all tabs
+            settingsTabs.forEach(tab => {
+              tab.classList.add('hidden');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tab}-tab`).classList.remove('hidden');
+          });
+        });
+        
+        // Modal functionality
+        const dataCollectionModal = document.getElementById('data-collection-modal');
+        const tokenCreationModal = document.getElementById('token-creation-modal');
+        const projectCreationModal = document.getElementById('project-creation-modal');
+        const newSubmissionButton = document.getElementById('new-submission-button');
+        const createTokenButton = document.getElementById('create-token-button');
+        const addProjectButton = document.getElementById('add-project-button');
+        const closeModalButtons = document.querySelectorAll('#close-modal, #cancel-data-submit, .close-modal, .cancel-token-creation, .cancel-project-creation');
+        
+        if (newSubmissionButton) {
+          newSubmissionButton.addEventListener('click', function() {
+            dataCollectionModal.classList.remove('hidden');
+          });
+        }
+        
+        if (createTokenButton) {
+          createTokenButton.addEventListener('click', function() {
+            tokenCreationModal.classList.remove('hidden');
+          });
+        }
+        
+        if (addProjectButton) {
+          addProjectButton.addEventListener('click', function() {
+            projectCreationModal.classList.remove('hidden');
+          });
+        }
+        
+        closeModalButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            dataCollectionModal.classList.add('hidden');
+            tokenCreationModal.classList.add('hidden');
+            projectCreationModal.classList.add('hidden');
+          });
+        });
+        
+        // Get geolocation in data collection form
+        const getLocationButton = document.getElementById('get-location');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        
+        if (getLocationButton) {
+          getLocationButton.addEventListener('click', function() {
+            if (navigator.geolocation) {
+              getLocationButton.innerHTML = '<div class="loading-spinner"></div>';
+              
+              navigator.geolocation.getCurrentPosition(function(position) {
+                latitudeInput.value = position.coords.latitude;
+                longitudeInput.value = position.coords.longitude;
+                getLocationButton.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+                
+                showToast('Success', 'Location detected successfully', 'success');
+              }, function(error) {
+                getLocationButton.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+                showToast('Error', 'Could not get location: ' + error.message, 'error');
+              });
+            } else {
+              showToast('Error', 'Geolocation is not supported by this browser', 'error');
+            }
+          });
+        }
+        
+        // Form submission handlers
+        const submitDataButton = document.getElementById('submit-data-submit');
+        const createTokenSubmitButton = document.getElementById('create-token-submit');
+        const createProjectSubmitButton = document.getElementById('create-project-submit');
+        
+        if (submitDataButton) {
+          submitDataButton.addEventListener('click', function() {
+            dataCollectionModal.classList.add('hidden');
+            showToast('Success', 'Data submitted successfully!', 'success');
+          });
+        }
+        
+        if (createTokenSubmitButton) {
+          createTokenSubmitButton.addEventListener('click', function() {
+            tokenCreationModal.classList.add('hidden');
+            showToast('Success', 'Token created successfully!', 'success');
+          });
+        }
+        
+        if (createProjectSubmitButton) {
+          createProjectSubmitButton.addEventListener('click', function() {
+            projectCreationModal.classList.add('hidden');
+            showToast('Success', 'Project created successfully!', 'success');
+          });
+        }
+        
+        // Initialize maps if Leaflet is available
+        if (typeof L !== 'undefined') {
+          // Project map
+          const projectsMap = document.getElementById('projects-map');
+          if (projectsMap) {
+            const map = L.map('projects-map').setView([20.5937, 78.9629], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add sample markers
+            L.marker([21.9497, 89.1833]).addTo(map)
+              .bindPopup("<b>Sundarbans Mangrove</b><br>128.5 hectares");
+              
+            L.marker([11.4300, 79.7900]).addTo(map)
+              .bindPopup("<b>Pichavaram Mangrove</b><br>85.2 hectares");
+              
+            L.marker([19.8400, 85.4788]).addTo(map)
+              .bindPopup("<b>Chilika Lake Seagrass</b><br>42.7 hectares");
+              
+            L.marker([9.2500, 79.2200]).addTo(map)
+              .bindPopup("<b>Gulf of Mannar Seagrass</b><br>56.4 hectares");
+          }
+          
+          // NGO map
+          const ngoMap = document.getElementById('ngo-map');
+          if (ngoMap) {
+            const map = L.map('ngo-map').setView([20.5937, 78.9629], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add sample markers
+            L.marker([21.9497, 89.1833]).addTo(map)
+              .bindPopup("<b>Sundarbans Mangrove</b><br>Active");
+              
+            L.marker([11.4300, 79.7900]).addTo(map)
+              .bindPopup("<b>Pichavaram Mangrove</b><br>Active");
+              
+            L.marker([19.8400, 85.4788]).addTo(map)
+              .bindPopup("<b>Chilika Lake Seagrass</b><br>Pending");
+          }
+          
+          // Admin map
+          const adminMap = document.getElementById('admin-map');
+          if (adminMap) {
+            const map = L.map('admin-map').setView([20.5937, 78.9629], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add sample markers with different colors
+            const greenIcon = L.divIcon({
+              className: 'custom-div-icon',
+              html: `<div style="background-color: #10B981; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+              iconSize: [12, 12]
+            });
+            
+            const yellowIcon = L.divIcon({
+              className: 'custom-div-icon',
+              html: `<div style="background-color: #F59E0B; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+              iconSize: [12, 12]
+            });
+            
+            L.marker([21.9497, 89.1833], {icon: greenIcon}).addTo(map)
+              .bindPopup("<b>Sundarbans Mangrove</b><br>Active");
+              
+            L.marker([11.4300, 79.7900], {icon: greenIcon}).addTo(map)
+              .bindPopup("<b>Pichavaram Mangrove</b><br>Active");
+              
+            L.marker([19.8400, 85.4788], {icon: yellowIcon}).addTo(map)
+              .bindPopup("<b>Chilika Lake Seagrass</b><br>Pending");
+              
+            L.marker([9.2500, 79.2200], {icon: greenIcon}).addTo(map)
+              .bindPopup("<b>Gulf of Mannar Seagrass</b><br>Active");
+              
+            // Add polygons for project boundaries
+            const sundarbansBoundary = L.polygon([
+              [21.93, 89.15],
+              [21.97, 89.15],
+              [21.97, 89.22],
+              [21.93, 89.22]
+            ], {color: '#10B981', fillOpacity: 0.3}).addTo(map)
+              .bindPopup("Sundarbans Project Boundary");
+          }
+        }
+        
+        // Initialize charts if Chart.js is available
+        if (typeof Chart !== 'undefined') {
+          // Projects chart
+          const projectsChartElement = document.getElementById('projectsChart');
+          if (projectsChartElement) {
+            new Chart(projectsChartElement, {
+              type: 'bar',
+              data: {
+                labels: ['Mangrove', 'Seagrass', 'Salt Marsh', 'Mixed'],
+                datasets: [{
+                  label: 'Projects by Type',
+                  data: [8, 4, 2, 1],
+                  backgroundColor: [
+                    'rgba(8, 145, 178, 0.7)',
+                    'rgba(5, 150, 105, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                    'rgba(124, 58, 237, 0.7)'
+                  ],
+                  borderColor: [
+                    'rgb(8, 145, 178)',
+                    'rgb(5, 150, 105)',
+                    'rgb(249, 115, 22)',
+                    'rgb(124, 58, 237)'
+                  ],
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      stepSize: 1
+                    }
+                  }
+                }
+              }
+            });
+          }
+          
+          // Credits chart
+          const creditsChartElement = document.getElementById('creditsChart');
+          if (creditsChartElement) {
+            new Chart(creditsChartElement, {
+              type: 'line',
+              data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                  label: 'Credits Generated',
+                  data: [12500, 19200, 35400, 52300, 68900, 87350],
+                  backgroundColor: 'rgba(8, 145, 178, 0.1)',
+                  borderColor: 'rgb(8, 145, 178)',
+                  tension: 0.3,
+                  fill: true
+                }]
+              },
+              options: {
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          }
+          
+          // Project distribution chart
+          const projectDistributionElement = document.getElementById('projectDistributionChart');
+          if (projectDistributionElement) {
+            new Chart(projectDistributionElement, {
+              type: 'doughnut',
+              data: {
+                labels: ['West Bengal', 'Tamil Nadu', 'Odisha', 'Gujarat', 'Kerala'],
+                datasets: [{
+                  data: [35, 28, 20, 12, 5],
+                  backgroundColor: [
+                    'rgba(8, 145, 178, 0.7)',
+                    'rgba(5, 150, 105, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                    'rgba(124, 58, 237, 0.7)',
+                    'rgba(236, 72, 153, 0.7)'
+                  ],
+                  borderColor: [
+                    'rgb(8, 145, 178)',
+                    'rgb(5, 150, 105)',
+                    'rgb(249, 115, 22)',
+                    'rgb(124, 58, 237)',
+                    'rgb(236, 72, 153)'
+                  ],
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom'
+                  }
+                }
+              }
+            });
+          }
+          
+          // Token distribution chart
+          const tokenDistributionElement = document.getElementById('tokenDistributionChart');
+          if (tokenDistributionElement) {
+            new Chart(tokenDistributionElement, {
+              type: 'pie',
+              data: {
+                labels: ['Mangrove', 'Seagrass', 'Salt Marsh'],
+                datasets: [{
+                  data: [65, 25, 10],
+                  backgroundColor: [
+                    'rgba(8, 145, 178, 0.7)',
+                    'rgba(5, 150, 105, 0.7)',
+                    'rgba(249, 115, 22, 0.7)'
+                  ],
+                  borderColor: [
+                    'rgb(8, 145, 178)',
+                    'rgb(5, 150, 105)',
+                    'rgb(249, 115, 22)'
+                  ],
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom'
+                  }
+                }
+              }
+            });
+          }
+        }
+        
+        // Toast notification
+        const toast = document.getElementById('toast-notification');
+        const toastTitle = document.getElementById('toast-title');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+        const toastIconI = document.getElementById('toast-icon-i');
+        const closeToast = document.getElementById('close-toast');
+        
+        if (closeToast) {
+          closeToast.addEventListener('click', function() {
+            toast.classList.remove('show');
+          });
+        }
+        
+        // Helper functions
+        function showPage(pageName) {
+          // Hide all pages
+          document.querySelectorAll('.page-content').forEach(page => {
+            page.classList.add('hidden');
+          });
+          
+          // Show selected page
+          const selectedPage = document.getElementById(`${pageName}-page`);
+          if (selectedPage) {
+            selectedPage.classList.remove('hidden');
+          }
+          
+          // Update navigation
+          document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('data-page') === pageName) {
+              link.classList.add('border-blue-carbon', 'text-blue-carbon', 'border-b-2', 'font-medium');
+              link.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+            } else {
+              link.classList.remove('border-blue-carbon', 'text-blue-carbon', 'border-b-2', 'font-medium');
+              link.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+            }
+          });
+          
+          document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            if (link.getAttribute('data-page') === pageName) {
+              link.classList.add('bg-blue-50', 'border-blue-carbon', 'text-blue-carbon');
+              link.classList.remove('border-transparent', 'text-gray-600');
+            } else {
+              link.classList.remove('bg-blue-50', 'border-blue-carbon', 'text-blue-carbon');
+              link.classList.add('border-transparent', 'text-gray-600');
+            }
+          });
+          
+          // Hide mobile menu after selection
+          const mobileMenu = document.getElementById('mobile-menu');
+          if (mobileMenu) {
+            mobileMenu.classList.add('hidden');
+          }
+        }
+        
+        function setRoleSpecificContent(role) {
+          // Hide all role-specific content
+          document.querySelectorAll('.role-content').forEach(content => {
+            content.classList.add('hidden');
+          });
+          
+          // Show content specific to the user's role
+          if (role === 'field_user') {
+            document.getElementById('field-user-dashboard').classList.remove('hidden');
+          } else if (role === 'ngo_staff') {
+            document.getElementById('ngo-staff-dashboard').classList.remove('hidden');
+          } else if (role === 'admin') {
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+          }
+        }
+        
+        function showToast(title, message, type) {
+          if (toast && toastTitle && toastMessage) {
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            toast.className = 'toast bg-white rounded-lg shadow-lg border-l-4 p-4 w-80';
+            
+            if (type === 'success') {
+              toast.classList.add('border-green-500');
+              toastIcon.className = 'flex-shrink-0 w-6 h-6 text-green-500 mr-3';
+              toastIconI.className = 'fa-solid fa-check-circle text-xl';
+            } else if (type === 'error') {
+              toast.classList.add('border-red-500');
+              toastIcon.className = 'flex-shrink-0 w-6 h-6 text-red-500 mr-3';
+              toastIconI.className = 'fa-solid fa-times-circle text-xl';
+            } else if (type === 'warning') {
+              toast.classList.add('border-yellow-500');
+              toastIcon.className = 'flex-shrink-0 w-6 h-6 text-yellow-500 mr-3';
+              toastIconI.className = 'fa-solid fa-exclamation-circle text-xl';
+            } else {
+              toast.classList.add('border-blue-500');
+              toastIcon.className = 'flex-shrink-0 w-6 h-6 text-blue-500 mr-3';
+              toastIconI.className = 'fa-solid fa-info-circle text-xl';
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(function() {
+              toast.classList.remove('show');
+            }, 5000);
+          }
+        }
+        
+        // Check if user was previously logged in (for demo purposes)
+        const userRole = localStorage.getItem('userRole');
+        
+        // Skip login screen if testing specific role
+        // Uncomment this section to bypass login for testing
+        /*
+        if (true) { // Force login bypass for testing
+          const role = 'admin'; // Change to: field_user, ngo_staff, or admin
+          localStorage.setItem('userRole', role);
+          
+          authContainer.classList.add('hidden');
+          appContainer.classList.remove('hidden');
+          
+          showPage('dashboard');
+          setRoleSpecificContent(role);
+        }
+        */
+      });
+    </script>
+  </body>
+</html>

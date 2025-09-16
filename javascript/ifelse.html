@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // var a = 10;
+        // if(a%2 == 0){
+        //     document.write("Even");
+        // }
+        // else{
+        //     document.write("Odd");
+        // }
+
+        var x=10;
+        var y=20;
+        var z=30;
+        var secondLargest;
+
+        if ((x > y && x < z) || (x > z && x < y)) {
+            secondLargest = x;
+            document.write("the second largest::", secondLargest);
+        } else if ((y > x && y < z) || (y > z && y < x)) {
+            secondLargest = y;
+            document.write("the second largest::", secondLargest);
+        } else {
+            secondLargest = z;
+            document.write("the second largest::", secondLargest);
+        }
+    </script>
+</body>
+</html>
