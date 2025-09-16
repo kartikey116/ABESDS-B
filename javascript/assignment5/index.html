@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+    <h2>counter</h2>
+    <div>
+        <button onclick="incermentCounter()">+</button>
+        <span id="counter">0</span>
+        <button onclick="decrementCounter()">-</button>
+    </div>
+    </div>
+
+    <script>
+        let count = 0;
+
+        function updateCounter(){
+            document.getElementById("counter").innerText = count;
+        }
+        function incermentCounter(){
+            count++;
+            updateCounter();
+            if(count > 10){
+                alert("Counter is greater than 10!");
+            }
+        }
+        function decrementCounter(){
+            count--;
+            updateCounter();
+            if(count < 0){
+                alert("Counter cannot be less than 0!");
+                count = 0;
+                updateCounter();
+            }
+        }
+    </script>
+</body>
+</html>

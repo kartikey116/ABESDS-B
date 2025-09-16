@@ -6,7 +6,16 @@
     <title>Document</title>
 </head>
 <body>
+    <div id="adi">
+        <button onclick="abes()">click</button>
+        <p id="aaa"></p>
+    </div>
+
     <script>
+        function abes(){
+            document.getElementById("aaa").innerHTML = "Hello World";
+        }
+        
         function add(x,y){
             return x+y;
         }
