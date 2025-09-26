@@ -7,11 +7,19 @@
 </head>
 <body>
     <p id="adi"></p>
+    <p id="adi2"></p>
+    <p id="adi3"></p>
     <script>
         let abes = function(){
             return "Hello World";
         }
-        document.getElementById("adi").innerHTML = abes();
+        let abes3 = () =>{
+            return "Hello World";
+        }
+        let abes4 = ()=> "python is the best";
+        document.getElementById("adi").innerHTML = abes3();
+        document.getElementById("adi2").innerHTML = abes();
+        document.getElementById("adi3").innerHTML = abes4();
     </script>
 </body>
 </html>
