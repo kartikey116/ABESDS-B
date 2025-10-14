@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const myPromise = new Promise((resolve, reject) => {
+            const password = prompt('Enter your password');
+            if (password === '123456') {
+                resolve('Password is correct');
+            } else {
+                reject(new Error('Password is incorrect'));
+            }
+        });
+        myPromise.then((mess) => {
+            console.log(mess);
+        }).catch((err) => {
+            console.log(err);
+        });
+    </script>
+</body>
+</html>

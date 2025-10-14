@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p id="firstname"></p>
+    <script>
+        const person = {
+            firstname: 'John',
+            lastname: 'Doe',
+            age: 30,
+            city: 'New York'
+        };
+
+        const {age,firstname} = person;
+        document.getElementById('firstname').innerHTML = firstname;
+    </script>
+</body>
+</html>
