@@ -1,14 +1,29 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Navbar from './components/Navbar'
+import Card from './components/card.jsx'
+import Count from './components/count1.jsx'
+import Link1 from './components/Link1.jsx'
+import Register from './components/Register.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-     <h1>Hello Vite!</h1>
+      {/* <Navbar />
+      <div className="container">
+        <Card 
+          title="Sample Card"
+          description="This is a sample card description"
+          image="https://cdn.pixabay.com/photo/2022/09/27/19/46/ai-generated-7483596_960_720.jpg"
+        />
+        <Card
+          name = "John Doe"
+          edu = "BSc Computer Science"
+        />
+
+        <Count/> */}
+
+        <Register />
+
     </>
   )
 }

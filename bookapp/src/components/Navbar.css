@@ -1,0 +1,61 @@
+/* ...existing code... */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #000; /* black background */
+  color: #fff; /* white text */
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.brand-link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* reset list */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+/* link styles */
+.nav-links li a,
+.nav-links li {
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: color 150ms ease, background 150ms ease;
+  cursor: pointer;
+}
+
+/* ensure anchor inside li also white */
+.nav-links li a {
+  color: inherit;
+  display: inline-block;
+}
+
+/* hover / focus — change item color to red */
+.nav-links li a:hover,
+.nav-links li a:focus,
+.nav-links li:hover,
+.nav-links li:focus {
+  color: red;
+  background: rgba(215, 13, 13, 0.05);
+  outline: none;
+}
+
+/* small-screen adjustments */
+@media (max-width: 600px) {
+  .nav-links { gap: 10px; }
+  .brand-link { font-size: 1rem; }
+}
