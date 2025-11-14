@@ -102,12 +102,12 @@ export default function Login() {
         {/* Register Link */}
         <p className="text-sm text-center mt-4 text-gray-600">
           Don’t have an account?{" "}
-          <a
+          <Link
             href="/register"
             className="text-blue-600 hover:underline font-medium"
           >
-            Register
-          </a>
+            <Register />
+          </Link>
         </p>
       </div>
     </div>

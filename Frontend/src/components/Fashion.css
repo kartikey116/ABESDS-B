@@ -1,0 +1,7 @@
+#card{
+    border: 5px solid red;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+
+}
