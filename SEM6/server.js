@@ -3,9 +3,6 @@ const fsPromises = require("fs/promises");
 
 const FILE = "data.json";
 
-/* ----------------------------------
-   1. Create / Write File
------------------------------------*/
 async function createFile() {
   const data = [
     { id: 1, name: "Kartikey", role: "Developer" }
@@ -15,17 +12,11 @@ async function createFile() {
   console.log("File created");
 }
 
-/* ----------------------------------
-   2. Read File
------------------------------------*/
 async function readFile() {
   const data = await fsPromises.readFile(FILE, "utf-8");
   console.log("File data:", JSON.parse(data));
 }
 
-/* ----------------------------------
-   3. Append Data
------------------------------------*/
 async function addUser(user) {
   const data = await fsPromises.readFile(FILE, "utf-8");
   const users = JSON.parse(data);
@@ -36,9 +27,6 @@ async function addUser(user) {
   console.log("User added");
 }
 
-/* ----------------------------------
-   4. Update Data
------------------------------------*/
 async function updateUser(id, newName) {
   const data = await fsPromises.readFile(FILE, "utf-8");
   const users = JSON.parse(data);
@@ -51,9 +39,6 @@ async function updateUser(id, newName) {
   console.log("User updated");
 }
 
-/* ----------------------------------
-   5. Delete Data
------------------------------------*/
 async function deleteUser(id) {
   const data = await fsPromises.readFile(FILE, "utf-8");
   const users = JSON.parse(data);
@@ -64,9 +49,6 @@ async function deleteUser(id) {
   console.log("User deleted");
 }
 
-/* ----------------------------------
-   6. Check File Exists
------------------------------------*/
 function checkFile() {
   if (fs.existsSync(FILE)) {
     console.log("File exists");
@@ -75,17 +57,11 @@ function checkFile() {
   }
 }
 
-/* ----------------------------------
-   7. Rename File
------------------------------------*/
 async function renameFile() {
   await fsPromises.rename(FILE, "users.json");
   console.log("File renamed");
 }
 
-/* ----------------------------------
-   Run All
------------------------------------*/
 async function run() {
   await createFile();
   await readFile();
