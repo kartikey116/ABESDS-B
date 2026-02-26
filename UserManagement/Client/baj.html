@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Market Control</title>
+    <style>
+        /* ==================== CSS RESET & VARIABLES ==================== */
+        :root {
+            --primary: #6C5CE7;
+            --primary-dark: #5A4BD1;
+            --primary-light: #A29BFE;
+            --secondary: #00CEC9;
+            --accent: #FD79A8;
+            --danger: #FF6B6B;
+            --warning: #FDCB6E;
+            --success: #00B894;
+            --dark: #0A0A1A;
+            --dark-card: #12122A;
+            --dark-card-hover: #1A1A3E;
+            --dark-border: #2D2D5E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B2B2D8;
+            --text-muted: #6C6C9E;
+            --gradient-1: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            --gradient-2: linear-gradient(135deg, #00CEC9, #55EFC4);
+            --gradient-3: linear-gradient(135deg, #FD79A8, #FDCB6E);
+            --gradient-danger: linear-gradient(135deg, #FF6B6B, #EE5A24);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.15);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ==================== LOGIN PAGE ==================== */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.15), transparent 70%);
+            top: -200px;
+            right: -200px;
+            border-radius: 50%;
+        }
+
+        .login-container::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 206, 201, 0.1), transparent 70%);
+            bottom: -100px;
+            left: -100px;
+            border-radius: 50%;
+        }
+
+        .login-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow), var(--shadow-glow);
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .login-logo .icon-circle {
+            width: 72px;
+            height: 72px;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 32px;
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
+        }
+
+        .login-logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .login-logo p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.06);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-icon-wrap {
+            position: relative;
+        }
+
+        .input-icon-wrap .form-input {
+            padding-left: 48px;
+        }
+
+        .input-icon-wrap .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .input-icon-wrap .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+
+        .input-icon-wrap .toggle-password:hover {
+            color: var(--primary-light);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            color: var(--danger);
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .login-error.show {
+            display: flex;
+        }
+
+        /* ==================== DASHBOARD LAYOUT ==================== */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background: var(--dark-card);
+            border-right: 1px solid var(--dark-border);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--dark-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header .logo-text h2 {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .sidebar-header .logo-text span {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 12px 16px 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 2px;
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(108, 92, 231, 0.08);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--primary-light);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            bottom: 8px;
+            width: 3px;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-item .nav-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item .nav-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid var(--dark-border);
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .admin-profile:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .admin-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .admin-info .admin-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .admin-info .admin-role {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        /* Top Header */
+        .top-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(10, 10, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--dark-border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title-section h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .page-title-section p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-time {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-sm);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .header-time .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .btn-icon {
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--dark-border);
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .btn-icon:hover {
+            background: rgba(108, 92, 231, 0.1);
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+
+        .btn-icon .notif-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--dark-card);
+        }
+
+        .btn-logout {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: var(--danger);
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 28px 32px;
+        }
+
+        /* Page Section */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ==================== OVERVIEW STATS ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .stat-card .stat-change {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .stat-change.up {
+            background: rgba(0, 184, 148, 0.15);
+            color: var(--success);
+        }
+
+        .stat-change.down {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--danger);
+        }
+
+        .stat-card.card-purple .stat-icon { background: rgba(108, 92, 231, 0.15); color: var(--primary-light); }
+        .stat-card.card-teal .stat-icon { background: rgba(0, 206, 201, 0.15); color: var(--secondary); }
+        .stat-card.card-pink .stat-icon { background: rgba(253, 121, 168, 0.15); color: var(--accent); }
+        .stat-card.card-green .stat-icon { background: rgba(0, 184, 148, 0.15); color: var(--success); }
+
+        /* ==================== MARKET CONTROL ==================== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header h2 .section-icon {
+            font-size: 22px;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .market-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .market-card:hover {
+            border-color: rgba(108, 92, 231, 0.3);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .market-card-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .market-name-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .market-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .market-dot.open {
+            background: var(--success);
+            box-shadow: 0 0 12px rgba(0, 184, 148, 0.5);
+        }
+
+        .market-dot.closed {
+            background: var(--danger);
+            box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+        }
+
+        .market-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .market-status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .market-status-badge.open {
+            background: rgba(0, 184, 148, 0.15);
+            color: var(--success);
+        }
+
+        .market-status-badge.closed {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--danger);
+        }
+
+        .market-card-body {
+            padding: 24px;
+        }
+
+        .time-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .time-control label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .time-control input[type="time"] {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .time-control input[type="time"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+
+        .time-control input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.6);
+            cursor: pointer;
+        }
+
+        .market-stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid var(--dark-border);
+        }
+
+        .market-stat-item {
+            text-align: center;
+        }
+
+        .market-stat-item .ms-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .market-stat-item .ms-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .market-card-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--dark-border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-save {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-toggle-market {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+
+        .btn-toggle-market.open-btn {
+            background: rgba(0, 184, 148, 0.15);
+            color: var(--success);
+            border-color: rgba(0, 184, 148, 0.2);
+        }
+
+        .btn-toggle-market:hover {
+            opacity: 0.85;
+        }
+
+        /* ==================== DAILY RESET SECTION ==================== */
+        .daily-reset-panel {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .reset-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .reset-info .reset-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(253, 203, 110, 0.12);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .reset-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .reset-details p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .reset-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .date-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .date-tab {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--dark-border);
+            color: var(--text-secondary);
+        }
+
+        .date-tab.active {
+            background: var(--gradient-1);
+            color: white;
+            border-color: transparent;
+        }
+
+        .date-tab:hover:not(.active) {
+            background: rgba(108, 92, 231, 0.08);
+            border-color: rgba(108, 92, 231, 0.3);
+        }
+
+        /* ==================== LIVE MONITORING TABLE ==================== */
+        .live-section {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .live-section-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .live-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .live-title-group h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 600;
+            background: rgba(0, 184, 148, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .live-indicator .blink {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .table-filters {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-select {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-select option {
+            background: var(--dark-card);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .data-table td {
+            padding: 14px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: var(--transition);
+        }
+
+        .data-table tr {
+            transition: var(--transition);
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(108, 92, 231, 0.04);
+        }
+
+        .data-table tbody tr.new-row {
+            animation: highlightRow 2s ease;
+        }
+
+        @keyframes highlightRow {
+            0% { background: rgba(0, 184, 148, 0.15); }
+            100% { background: transparent; }
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .user-details-sm .user-name-sm {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .user-details-sm .user-id-sm {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .bet-number {
+            font-weight: 800;
+            font-size: 16px;
+            background: rgba(108, 92, 231, 0.12);
+            color: var(--primary-light);
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bet-amount {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .market-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .market-badge.m1 {
+            background: rgba(108, 92, 231, 0.12);
+            color: var(--primary-light);
+        }
+
+        .market-badge.m2 {
+            background: rgba(0, 206, 201, 0.12);
+            color: var(--secondary);
+        }
+
+        .market-badge.m3 {
+            background: rgba(253, 121, 168, 0.12);
+            color: var(--accent);
+        }
+
+        .time-stamp {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ==================== RESULT DECLARATION ==================== */
+        .result-section {
+            margin-bottom: 28px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .result-form-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .result-form-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .result-form-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-form-body {
+            padding: 24px;
+        }
+
+        .market-select-group {
+            margin-bottom: 20px;
+        }
+
+        .market-select-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .market-radio-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .market-radio {
+            flex: 1;
+        }
+
+        .market-radio input[type="radio"] {
+            display: none;
+        }
+
+        .market-radio label {
+            display: block;
+            padding: 14px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--dark-border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .market-radio input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--primary-light);
+            box-shadow: 0 0 16px rgba(108, 92, 231, 0.2);
+        }
+
+        .market-radio label:hover {
+            border-color: rgba(108, 92, 231, 0.4);
+        }
+
+        .winning-number-input {
+            margin-bottom: 24px;
+        }
+
+        .winning-number-input label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .number-input-large {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--dark-border);
+            border-radius: var(--radius-sm);
+            color: var(--primary-light);
+            outline: none;
+            transition: var(--transition);
+            letter-spacing: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .number-input-large:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.2);
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .number-input-large::placeholder {
+            color: var(--text-muted);
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .result-preview {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .preview-row .preview-label {
+            color: var(--text-muted);
+        }
+
+        .preview-row .preview-value {
+            font-weight: 600;
+        }
+
+        .btn-declare {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-danger);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-declare:hover {
+            box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-declare:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Result History */
+        .result-history-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .result-history-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .result-history-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-history-body {
+            padding: 16px 24px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-number-big {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .result-number-big.r-purple {
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--primary-light);
+        }
+
+        .result-number-big.r-teal {
+            background: rgba(0, 206, 201, 0.15);
+            color: var(--secondary);
+        }
+
+        .result-number-big.r-pink {
+            background: rgba(253, 121, 168, 0.15);
+            color: var(--accent);
+        }
+
+        .result-details {
+            flex: 1;
+        }
+
+        .result-details .rd-market {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .result-details .rd-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .result-meta {
+            text-align: right;
+        }
+
+        .result-meta .rm-winners {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .result-meta .rm-payout {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ==================== CONFIRMATION MODAL ==================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 20px;
+            padding: 36px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .modal-icon.warning {
+            background: rgba(253, 203, 110, 0.15);
+            color: var(--warning);
+        }
+
+        .modal-icon.success {
+            background: rgba(0, 184, 148, 0.15);
+            color: var(--success);
+        }
+
+        .modal h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .modal .modal-highlight {
+            background: rgba(108, 92, 231, 0.1);
+            border: 1px solid rgba(108, 92, 231, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-light);
+            letter-spacing: 8px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dark-border);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-confirm {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Success Modal */
+        .success-modal .modal-number-display {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--success);
+            letter-spacing: 12px;
+            margin: 16px 0;
+        }
+
+        /* ==================== TOAST NOTIFICATIONS ==================== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 20px;
+            min-width: 320px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow);
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 3.7s forwards;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(50px); }
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-content .toast-title {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .toast-content .toast-msg {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.info { border-left: 3px solid var(--primary); }
+
+        /* ==================== SCROLLBAR ==================== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--dark-border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .market-grid { grid-template-columns: 1fr; }
+            .result-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .content-area { padding: 16px; }
+            .top-header { padding: 12px 16px; }
+            .reset-info { flex-direction: column; align-items: flex-start; }
+            .reset-actions { margin-left: 0; margin-top: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== LOGIN PAGE ==================== -->
+    <div class="login-container" id="loginPage">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="icon-circle">🎯</div>
+                <h1>Admin Panel</h1>
+                <p>Market Control Dashboard</p>
+            </div>
+
+            <div class="login-error" id="loginError">
+                <span>⚠️</span>
+                <span>Invalid email or password. Please try again.</span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-icon-wrap">
+                        <span class="input-icon">📧</span>
+                        <input type="email" class="form-input" id="loginEmail" 
+                               placeholder="admin@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-icon-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" class="form-input" id="loginPassword" 
+                               placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    Sign In to Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div class="dashboard" id="dashboard">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">🎯</div>
+                <div class="logo-text">
+                    <h2>MarketHub</h2>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <div class="nav-item active" onclick="switchPage('overview', this)">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" onclick="switchPage('markets', this)">
+                    <span class="nav-icon">🏪</span>
+                    <span>Market Control</span>
+                </div>
+                <div class="nav-item" onclick="switchPage('livefeed', this)">
+                    <span class="nav-icon">📡</span>
+                    <span>Live Monitoring</span>
+                    <span class="nav-badge" id="liveBetCount">12</span>
+                </div>
+                <div class="nav-item" onclick="switchPage('results', this)">
+                    <span class="nav-icon">🏆</span>
+                    <span>Results</span>
+                </div>
+
+                <div class="nav-section-title">System</div>
+                <div class="nav-item" onclick="switchPage('daily', this)">
+                    <span class="nav-icon">🔄</span>
+                    <span>Daily Reset</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span>Users</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <div class="admin-avatar">A</div>
+                    <div class="admin-info">
+                        <div class="admin-name">Admin User</div>
+                        <div class="admin-role">Super Admin</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="page-title-section">
+                    <h1 id="pageTitle">Overview</h1>
+                    <p id="pageSubtitle">Market statistics and activity</p>
+                </div>
+                <div class="header-actions">
+                    <div class="header-time">
+                        <span class="live-dot"></span>
+                        <span id="liveTime">--:--:--</span>
+                    </div>
+                    <button class="btn-icon">
+                        🔔
+                        <span class="notif-dot"></span>
+                    </button>
+                    <button class="btn-icon btn-logout" onclick="handleLogout()">
+                        🚪
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <!-- ===== OVERVIEW PAGE ===== -->
+                <div class="page-section active" id="page-overview">
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card card-purple">
+                            <div class="stat-icon">📈</div>
+                            <div class="stat-value" id="totalBetsToday">1,247</div>
+                            <div class="stat-label">Total Bets Today</div>
+                            <div class="stat-change up">↑ 12.5%</div>
+                        </div>
+                        <div class="stat-card card-teal">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-value" id="totalVolume">₹4,85,200</div>
+                            <div class="stat-label">Total Volume</div>
+                            <div class="stat-change up">↑ 8.3%</div>
+                        </div>
+                        <div class="stat-card card-pink">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value" id="activeUsers">342</div>
+                            <div class="stat-label">Active Users</div>
+                            <div class="stat-change up">↑ 5.1%</div>
+                        </div>
+                        <div class="stat-card card-green">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value" id="marketsOpen">2/3</div>
+                            <div class="stat-label">Markets Open</div>
+                            <div class="stat-change down">1 closed</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Market Overview -->
+                    <div class="section-header">
+                        <h2><span class="section-icon">🏪</span> Market Status</h2>
+                    </div>
+                    <div class="market-grid" id="overviewMarkets">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Recent Bets Mini Table -->
+                    <div class="live-section">
+                        <div class="live-section-header">
+                            <div class="live-title-group">
+                                <h3>Recent Activity</h3>
+                                <div class="live-indicator">
+                                    <span class="blink"></span>
+                                    LIVE
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-wrapper" style="max-height: 300px;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Market</th>
+                                        <th>Number</th>
+                                        <th>Amount</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentBetsBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== MARKET CONTROL PAGE ===== -->
+                <div class="page-section" id="page-markets">
+                    <div class="section-header">
+                        <h2><span class="section-icon">🏪</span> Market Configuration</h2>
+                    </div>
+                    <div class="market-grid" id="marketControlGrid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- ===== LIVE MONITORING PAGE ===== -->
+                <div class="page-section" id="page-livefeed">
+                    <!-- Daily Reset Panel -->
+                    <div class="daily-reset-panel">
+                        <div class="reset-info">
+                            <div class="reset-icon">📅</div>
+                            <div class="reset-details">
+                                <h3>Viewing: <span id="currentDateDisplay">Today's Bets</span></h3>
+                                <p>The system automatically separates bets by day. 
+                                   New day starts at 00:00 with fresh market data.</p>
+                            </div>
+                            <div class="reset-actions">
+                                <div class="date-tabs">
+                                    <div class="date-tab active" onclick="switchDateTab('today', this)">
+                                        Today
+                                    </div>
+                                    <div class="date-tab" onclick="switchDateTab('yesterday', this)">
+                                        Yesterday
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Feed Table -->
+                    <div class="live-section">
+                        <div class="live-section-header">
+                            <div class="live-title-group">
+                                <h3>Live Bet Feed</h3>
+                                <div class="live-indicator">
+                                    <span class="blink"></span>
+                                    LIVE
+                                </div>
+                            </div>
+                            <div class="table-filters">
+                                <select class="filter-select" id="filterMarket" onchange="filterBets()">
+                                    <option value="all">All Markets</option>
+                                    <option value="Delhi">Delhi Market</option>
+                                    <option value="Mumbai">Mumbai Market</option>
+                                    <option value="Kolkata">Kolkata Market</option>
+                                </select>
+                                <select class="filter-select" id="filterSort">
+                                    <option value="newest">Newest First</option>
+                                    <option value="highest">Highest Amount</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>User</th>
+                                        <th>Market</th>
+                                        <th>Number</th>
+                                        <th>Amount</th>
+                                        <th>Type</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="liveBetsBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== RESULTS PAGE ===== -->
+                <div class="page-section" id="page-results">
+                    <div class="result-grid">
+                        <!-- Result Declaration Form -->
+                        <div class="result-form-card">
+                            <div class="result-form-header">
+                                <h3>🏆 Declare Result</h3>
+                            </div>
+                            <div class="result-form-body">
+                                <div class="market-select-group">
+                                    <label>Select Market</label>
+                                    <div class="market-radio-group">
+                                        <div class="market-radio">
+                                            <input type="radio" name="resultMarket" id="rm1" 
+                                                   value="Delhi" checked>
+                                            <label for="rm1">🔵 Delhi</label>
+                                        </div>
+                                        <div class="market-radio">
+                                            <input type="radio" name="resultMarket" id="rm2" 
+                                                   value="Mumbai">
+                                            <label for="rm2">🟢 Mumbai</label>
+                                        </div>
+                                        <div class="market-radio">
+                                            <input type="radio" name="resultMarket" id="rm3" 
+                                                   value="Kolkata">
+                                            <label for="rm3">🔴 Kolkata</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="winning-number-input">
+                                    <label>Winning Number</label>
+                                    <input type="text" class="number-input-large" id="winningNumber"
+                                           placeholder="Enter number" maxlength="2"
+                                           oninput="updateResultPreview()">
+                                </div>
+
+                                <div class="result-preview" id="resultPreview">
+                                    <div class="preview-row">
+                                        <span class="preview-label">Market</span>
+                                        <span class="preview-value" id="prevMarket">Delhi Market</span>
+                                    </div>
+                                    <div class="preview-row">
+                                        <span class="preview-label">Date</span>
+                                        <span class="preview-value" id="prevDate">--</span>
+                                    </div>
+                                    <div class="preview-row">
+                                        <span class="preview-label">Winning Number</span>
+                                        <span class="preview-value" id="prevNumber" 
+                                              style="color: var(--primary-light); font-size: 18px;">--</span>
+                                    </div>
+                                    <div class="preview-row">
+                                        <span class="preview-label">Total Bets on Number</span>
+                                        <span class="preview-value" id="prevBetCount">--</span>
+                                    </div>
+                                    <div class="preview-row">
+                                        <span class="preview-label">Estimated Payout</span>
+                                        <span class="preview-value" id="prevPayout" 
+                                              style="color: var(--danger);">--</span>
+                                    </div>
+                                </div>
+
+                                <button class="btn-declare" id="declareBtn" onclick="openConfirmModal()"
+                                        disabled>
+                                    ⚡ Declare Result
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Result History -->
+                        <div class="result-history-card">
+                            <div class="result-history-header">
+                                <h3>📋 Recent Results</h3>
+                            </div>
+                            <div class="result-history-body" id="resultHistoryBody">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== DAILY RESET PAGE ===== -->
+                <div class="page-section" id="page-daily">
+                    <div class="daily-reset-panel" style="margin-bottom: 24px;">
+                        <div class="reset-info">
+                            <div class="reset-icon">🔄</div>
+                            <div class="reset-details">
+                                <h3>Daily Reset System</h3>
+                                <p>The system automatically resets at midnight (00:00). 
+                                   All markets open fresh, and yesterday's bets are archived. 
+                                   Manual reset is available below for testing.</p>
+                            </div>
+                            <div class="reset-actions">
+                                <button class="btn btn-primary" onclick="manualReset()" 
+                                        style="white-space: nowrap;">
+                                    🔄 Manual Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card card-purple">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-value" id="todayBetsStat">847</div>
+                            <div class="stat-label">Today's Bets</div>
+                        </div>
+                        <div class="stat-card card-teal">
+                            <div class="stat-icon">📆</div>
+                            <div class="stat-value" id="yesterdayBetsStat">1,102</div>
+                            <div class="stat-label">Yesterday's Bets</div>
+                        </div>
+                        <div class="stat-card card-green">
+                            <div class="stat-icon">⏰</div>
+                            <div class="stat-value" id="nextResetTime">--:--:--</div>
+                            <div class="stat-label">Next Auto Reset</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== CONFIRMATION MODAL ==================== -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <div class="modal-icon warning">⚠️</div>
+            <h3>Confirm Result Declaration</h3>
+            <p>You are about to declare the winning number for:</p>
+            <p style="font-weight: 600; color: var(--text-primary);" id="modalMarketName">Delhi Market</p>
+            <div class="modal-highlight" id="modalNumber">42</div>
+            <p style="color: var(--danger); font-size: 12px;">
+                ⚠️ This action cannot be undone
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-confirm" onclick="confirmDeclareResult()">Confirm & Declare</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SUCCESS MODAL ==================== -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal success-modal">
+            <div class="modal-icon success">✅</div>
+            <h3>Result Declared Successfully!</h3>
+            <div class="modal-number-display" id="successNumber">42</div>
+            <p id="successMarket">Delhi Market</p>
+            <p style="margin-top: 8px;">
+                <span id="successWinners" style="color: var(--success); font-weight: 600;">23 winners</span> 
+                — Payout: <span id="successPayout" style="color: var(--danger); font-weight: 600;">₹1,15,000</span>
+            </p>
+            <div class="modal-actions" style="justify-content: center; margin-top: 24px;">
+                <button class="btn btn-primary" onclick="closeSuccessModal()" style="max-width: 200px;">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // ===== DATA STORE =====
+        const ADMIN_CREDENTIALS = {
+            email: 'admin@market.com',
+            password: 'admin123'
+        };
+
+        const markets = [
+            { id: 1, name: 'Delhi Market', emoji: '🔵', openTime: '09:00', closeTime: '17:00', 
+              isOpen: true, todayBets: 423, volume: 185200, color: 'purple', cssClass: 'm1' },
+            { id: 2, name: 'Mumbai Market', emoji: '🟢', openTime: '10:00', closeTime: '18:00', 
+              isOpen: true, todayBets: 387, volume: 165000, color: 'teal', cssClass: 'm2' },
+            { id: 3, name: 'Kolkata Market', emoji: '🔴', openTime: '11:00', closeTime: '19:00', 
+              isOpen: false, todayBets: 437, volume: 135000, color: 'pink', cssClass: 'm3' }
+        ];
+
+        const sampleUsers = [
+            { name: 'Rahul S.', id: 'USR001', color: '#6C5CE7' },
+            { name: 'Priya M.', id: 'USR002', color: '#00CEC9' },
+            { name: 'Amit K.', id: 'USR003', color: '#FD79A8' },
+            { name: 'Sneha R.', id: 'USR004', color: '#FDCB6E' },
+            { name: 'Vikram P.', id: 'USR005', color: '#00B894' },
+            { name: 'Neha D.', id: 'USR006', color: '#E17055' },
+            { name: 'Rohan G.', id: 'USR007', color: '#0984E3' },
+            { name: 'Anita B.', id: 'USR008', color: '#6C5CE7' },
+            { name: 'Karan T.', id: 'USR009', color: '#FD79A8' },
+            { name: 'Meera J.', id: 'USR010', color: '#00CEC9' }
+        ];
+
+        let liveBets = [];
+        let resultHistory = [];
+        let betCounter = 0;
+
+        // ===== LOGIN =====
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').classList.add('active');
+                initDashboard();
+            } else {
+                document.getElementById('loginError').classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('loginError').classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('loginPassword');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function handleLogout() {
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // ===== DASHBOARD INIT =====
+        function initDashboard() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderOverviewMarkets();
+            renderMarketControl();
+            generateInitialBets();
+            renderLiveBets();
+            renderRecentBets();
+            generateResultHistory();
+            renderResultHistory();
+            updateResultDate();
+            startLiveFeed();
+            updateNextResetTime();
+            setInterval(updateNextResetTime, 1000);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-IN', {
+                hour12: false
+            });
+        }
+
+        // ===== NAVIGATION =====
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById('page-' + pageId).classList.add('active');
+            if (element) element.classList.add('active');
+
+            const titles = {
+                overview: ['Overview', 'Market statistics and activity'],
+                markets: ['Market Control', 'Configure market open/close times'],
+                livefeed: ['Live Monitoring', 'Real-time bet feed and tracking'],
+                results: ['Results', 'Declare and manage results'],
+                daily: ['Daily Reset', 'Day management and reset controls']
+            };
+
+            if (titles[pageId]) {
+                document.getElementById('pageTitle').textContent = titles[pageId][0];
+                document.getElementById('pageSubtitle').textContent = titles[pageId][1];
+            }
+        }
+
+        // ===== RENDER OVERVIEW MARKETS =====
+        function renderOverviewMarkets() {
+            const container = document.getElementById('overviewMarkets');
+            container.innerHTML = markets.map(m => `
+                <div class="market-card">
+                    <div class="market-card-header">
+                        <div class="market-name-group">
+                            <div class="market-dot ${m.isOpen ? 'open' : 'closed'}"></div>
+                            <span class="market-name">${m.emoji} ${m.name}</span>
+                        </div>
+                        <span class="market-status-badge ${m.isOpen ? 'open' : 'closed'}">
+                            ${m.isOpen ? 'Open' : 'Closed'}
+                        </span>
+                    </div>
+                    <div class="market-card-body">
+                        <div class="market-stats-row" style="border-top: none; padding-top: 0;">
+                            <div class="market-stat-item">
+                                <div class="ms-value">${m.todayBets}</div>
+                                <div class="ms-label">Today's Bets</div>
+                            </div>
+                            <div class="market-stat-item">
+                                <div class="ms-value">₹${(m.volume/1000).toFixed(0)}K</div>
+                                <div class="ms-label">Volume</div>
+                            </div>
+                            <div class="market-stat-item">
+                                <div class="ms-value">${m.openTime} - ${m.closeTime}</div>
+                                <div class="ms-label">Hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== RENDER MARKET CONTROL =====
+        function renderMarketControl() {
+            const container = document.getElementById('marketControlGrid');
+            container.innerHTML = markets.map(m => `
+                <div class="market-card" id="marketCard-${m.id}">
+                    <div class="market-card-header">
+                        <div class="market-name-group">
+                            <div class="market-dot ${m.isOpen ? 'open' : 'closed'}" 
+                                 id="dot-${m.id}"></div>
+                            <span class="market-name">${m.emoji} ${m.name}</span>
+                        </div>
+                        <span class="market-status-badge ${m.isOpen ? 'open' : 'closed'}" 
+                              id="badge-${m.id}">
+                            ${m.isOpen ? 'Open' : 'Closed'}
+                        </span>
+                    </div>
+                    <div class="market-card-body">
+                        <div class="time-controls">
+                            <div class="time-control">
+                                <label>Open Time</label>
+                                <input type="time" value="${m.openTime}" id="open-${m.id}">
+                            </div>
+                            <div class="time-control">
+                                <label>Close Time</label>
+                                <input type="time" value="${m.closeTime}" id="close-${m.id}">
+                            </div>
+                        </div>
+                        <div class="market-stats-row">
+                            <div class="market-stat-item">
+                                <div class="ms-value">${m.todayBets}</div>
+                                <div class="ms-label">Bets Today</div>
+                            </div>
+                            <div class="market-stat-item">
+                                <div class="ms-value">₹${(m.volume/1000).toFixed(0)}K</div>
+                                <div class="ms-label">Volume</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="market-card-footer">
+                        <button class="btn-sm btn-save" onclick="saveMarketTime(${m.id})">
+                            💾 Save Times
+                        </button>
+                        <button class="btn-sm btn-toggle-market ${m.isOpen ? '' : 'open-btn'}" 
+                                id="toggleBtn-${m.id}"
+                                onclick="toggleMarket(${m.id})">
+                            ${m.isOpen ? '🔒 Close' : '🔓 Open'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveMarketTime(id) {
+            const market = markets.find(m => m.id === id);
+            market.openTime = document.getElementById('open-' + id).value;
+            market.closeTime = document.getElementById('close-' + id).value;
+            showToast('success', 'Times Updated', `${market.name} schedule saved: ${market.openTime} - ${market.closeTime}`);
+        }
+
+        function toggleMarket(id) {
+            const market = markets.find(m => m.id === id);
+            market.isOpen = !market.isOpen;
+
+            const dot = document.getElementById('dot-' + id);
+            const badge = document.getElementById('badge-' + id);
+            const btn = document.getElementById('toggleBtn-' + id);
+
+            dot.className = 'market-dot ' + (market.isOpen ? 'open' : 'closed');
+            badge.className = 'market-status-badge ' + (market.isOpen ? 'open' : 'closed');
+            badge.textContent = market.isOpen ? 'Open' : 'Closed';
+            btn.className = 'btn-sm btn-toggle-market ' + (market.isOpen ? '' : 'open-btn');
+            btn.innerHTML = market.isOpen ? '🔒 Close' : '🔓 Open';
+
+            const openCount = markets.filter(m => m.isOpen).length;
+            document.getElementById('marketsOpen').textContent = openCount + '/3';
+
+            showToast(
+                market.isOpen ? 'success' : 'error',
+                market.isOpen ? 'Market Opened' : 'Market Closed',
+                `${market.name} is now ${market.isOpen ? 'open' : 'closed'}`
+            );
+
+            renderOverviewMarkets();
+        }
+
+        // ===== LIVE BETS =====
+        function generateInitialBets() {
+            for (let i = 0; i < 15; i++) {
+                liveBets.push(generateBet());
+            }
+        }
+
+        function generateBet() {
+            betCounter++;
+            const user = sampleUsers[Math.floor(Math.random() * sampleUsers.length)];
+            const market = markets[Math.floor(Math.random() * markets.length)];
+            const betNumber = String(Math.floor(Math.random() * 100)).padStart(2, '0');
+            const amount = [50, 100, 200, 500, 1000, 2000][Math.floor(Math.random() * 6)];
+            const types = ['Single', 'Jodi', 'Panna'];
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-IN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            return {
+                id: betCounter,
+                user,
+                market,
+                number: betNumber,
+                amount,
+                type: types[Math.floor(Math.random() * types.length)],
+                time,
+                timestamp: Date.now()
+            };
+        }
+
+        function renderLiveBets() {
+            const tbody = document.getElementById('liveBetsBody');
+            const filterMarket = document.getElementById('filterMarket')?.value || 'all';
+
+            let filtered = filterMarket === 'all' 
+                ? liveBets 
+                : liveBets.filter(b => b.market.name.includes(filterMarket));
+
+            tbody.innerHTML = filtered.slice().reverse().map((bet, i) => `
+                <tr class="${i === 0 ? 'new-row' : ''}">
+                    <td style="color: var(--text-muted); font-size: 12px;">#${bet.id}</td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-sm" style="background: ${bet.user.color}20; color: ${bet.user.color};">
+                                ${bet.user.name.charAt(0)}
+                            </div>
+                            <div class="user-details-sm">
+                                <div class="user-name-sm">${bet.user.name}</div>
+                                <div class="user-id-sm">${bet.user.id}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="market-badge ${bet.market.cssClass}">${bet.market.emoji} ${bet.market.name.split(' ')[0]}</span></td>
+                    <td><span class="bet-number">${bet.number}</span></td>
+                    <td><span class="bet-amount">₹${bet.amount.toLocaleString()}</span></td>
+                    <td style="color: var(--text-secondary); font-size: 13px;">${bet.type}</td>
+                    <td><span class="time-stamp">${bet.time}</span></td>
+                    <td><span class="market-status-badge open" style="font-size: 10px;">Active</span></td>
+                </tr>
+            `).join('');
+
+            document.getElementById('liveBetCount').textContent = liveBets.length;
+        }
+
+        function renderRecentBets() {
+            const tbody = document.getElementById('recentBetsBody');
+            const recent = liveBets.slice(-5).reverse();
+
+            tbody.innerHTML = recent.map(bet => `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-sm" style="background: ${bet.user.color}20; color: ${bet.user.color};">
+                                ${bet.user.name.charAt(0)}
+                            </div>
+                            <div class="user-details-sm">
+                                <div class="user-name-sm">${bet.user.name}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="market-badge ${bet.market.cssClass}">${bet.market.name.split(' ')[0]}</span></td>
+                    <td><span class="bet-number">${bet.number}</span></td>
+                    <td><span class="bet-amount">₹${bet.amount.toLocaleString()}</span></td>
+                    <td><span class="time-stamp">${bet.time}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterBets() {
+            renderLiveBets();
+        }
+
+        function startLiveFeed() {
+            setInterval(() => {
+                const newBet = generateBet();
+                liveBets.push(newBet);
+                renderLiveBets();
+                renderRecentBets();
+
+                const totalBets = parseInt(document.getElementById('totalBetsToday').textContent.replace(/,/g, '')) + 1;
+                document.getElementById('totalBetsToday').textContent = totalBets.toLocaleString();
+            }, Math.random() * 4000 + 3000);
+        }
+
+        // ===== DATE TABS =====
+        function switchDateTab(period, element) {
+            document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('currentDateDisplay').textContent = 
+                period === 'today' ? "Today's Bets" : "Yesterday's Bets";
+            
+            if (period === 'yesterday') {
+                showToast('info', 'Viewing Yesterday', 'Showing archived bets from yesterday');
+            }
+        }
+
+        // ===== RESULTS =====
+        function updateResultDate() {
+            const now = new Date();
+            document.getElementById('prevDate').textContent = now.toLocaleDateString('en-IN', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+
+        function updateResultPreview() {
+            const num = document.getElementById('winningNumber').value;
+            const selectedMarket = document.querySelector('input[name="resultMarket"]:checked').value;
+            document.getElementById('prevMarket').textContent = selectedMarket + ' Market';
+            document.getElementById('prevNumber').textContent = num || '--';
+
+            if (num && num.length >= 1) {
+                const betCount = Math.floor(Math.random() * 40) + 5;
+                const payout = betCount * (Math.floor(Math.random() * 5000) + 1000);
+                document.getElementById('prevBetCount').textContent = betCount + ' bets';
+                document.getElementById('prevPayout').textContent = '₹' + payout.toLocaleString();
+                document.getElementById('declareBtn').disabled = false;
+            } else {
+                document.getElementById('prevBetCount').textContent = '--';
+                document.getElementById('prevPayout').textContent = '--';
+                document.getElementById('declareBtn').disabled = true;
+            }
+        }
+
+        document.querySelectorAll('input[name="resultMarket"]').forEach(radio => {
+            radio.addEventListener('change', updateResultPreview);
+        });
+
+        function openConfirmModal() {
+            const num = document.getElementById('winningNumber').value;
+            const market = document.querySelector('input[name="resultMarket"]:checked').value;
+            document.getElementById('modalMarketName').textContent = market + ' Market';
+            document.getElementById('modalNumber').textContent = num.padStart(2, '0');
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+
+        function confirmDeclareResult() {
+            const num = document.getElementById('winningNumber').value.padStart(2, '0');
+            const marketValue = document.querySelector('input[name="resultMarket"]:checked').value;
+            const market = markets.find(m => m.name.includes(marketValue));
+
+            closeConfirmModal();
+
+            const winners = Math.floor(Math.random() * 30) + 3;
+            const payout = winners * (Math.floor(Math.random() * 5000) + 1000);
+
+            // Add to result history
+            resultHistory.unshift({
+                market: market,
+                number: num,
+                date: new Date().toLocaleDateString('en-IN'),
+                time: new Date().toLocaleTimeString('en-IN', { hour12: false }),
+                winners: winners,
+                payout: payout
+            });
+
+            renderResultHistory();
+
+            // Show success modal
+            document.getElementById('successNumber').textContent = num;
+            document.getElementById('successMarket').textContent = market.name;
+            document.getElementById('successWinners').textContent = winners + ' winners';
+            document.getElementById('successPayout').textContent = '₹' + payout.toLocaleString();
+            document.getElementById('successModal').classList.add('show');
+
+            // Reset form
+            document.getElementById('winningNumber').value = '';
+            updateResultPreview();
+
+            showToast('success', 'Result Declared', `${market.name}: Winning number ${num}`);
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
+        }
+
+        function generateResultHistory() {
+            const pastResults = [
+                { market: markets[0], number: '42', date: 'Yesterday', time: '17:00', winners: 18, payout: 54000 },
+                { market: markets[1], number: '07', date: 'Yesterday', time: '18:00', winners: 23, payout: 92000 },
+                { market: markets[2], number: '85', date: 'Yesterday', time: '19:00', winners: 12, payout: 36000 },
+                { market: markets[0], number: '31', date: '2 days ago', time: '17:00', winners: 9, payout: 27000 },
+                { market: markets[1], number: '56', date: '2 days ago', time: '18:00', winners: 15, payout: 60000 },
+            ];
+            resultHistory = pastResults;
+        }
+
+        function renderResultHistory() {
+            const container = document.getElementById('resultHistoryBody');
+            const colorMap = { purple: 'r-purple', teal: 'r-teal', pink: 'r-pink' };
+
+            container.innerHTML = resultHistory.map(r => `
+                <div class="result-item">
+                    <div class="result-number-big ${colorMap[r.market.color]}">${r.number}</div>
+                    <div class="result-details">
+                        <div class="rd-market">${r.market.emoji} ${r.market.name}</div>
+                        <div class="rd-date">${r.date} at ${r.time}</div>
+                    </div>
+                    <div class="result-meta">
+                        <div class="rm-winners">${r.winners} winners</div>
+                        <div class="rm-payout">₹${r.payout.toLocaleString()}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== DAILY RESET =====
+        function updateNextResetTime() {
+            const now = new Date();
+            const midnight = new Date(now);
+            midnight.setHours(24, 0, 0, 0);
+            const diff = midnight - now;
+
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('nextResetTime').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function manualReset() {
+            liveBets = [];
+            betCounter = 0;
+            renderLiveBets();
+            renderRecentBets();
+            document.getElementById('totalBetsToday').textContent = '0';
+            document.getElementById('todayBetsStat').textContent = '0';
+            showToast('success', 'Reset Complete', 'All markets reset. Fresh day started.');
+        }
+
+        // ===== TOAST NOTIFICATIONS =====
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type]}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // ===== KEYBOARD SHORTCUT (Enter on login) =====
+        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginForm').requestSubmit();
+        });
+    </script>
+
+</body>
+</html>
